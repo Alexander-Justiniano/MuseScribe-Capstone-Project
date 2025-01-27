@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
 @RestController
 public class MusicAppApplication {
@@ -19,5 +20,5 @@ public class MusicAppApplication {
 	public String apiRoot(@PathVariable String name) {
 		return "your name is: "+name;
 	}
-
+	
 }
