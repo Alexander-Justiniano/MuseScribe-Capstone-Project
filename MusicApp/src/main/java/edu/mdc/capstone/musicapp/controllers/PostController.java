@@ -1,6 +1,6 @@
 package edu.mdc.capstone.musicapp.controllers;
 
-import edu.mdc.capstone.musicapp.modals.Post;
+import edu.mdc.capstone.musicapp.models.Post;
 import edu.mdc.capstone.musicapp.service.PostService;
 
 import org.springframework.web.bind.annotation.GetMapping;

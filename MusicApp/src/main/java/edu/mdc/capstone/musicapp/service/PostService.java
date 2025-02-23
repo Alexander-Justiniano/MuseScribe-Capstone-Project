@@ -4,7 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
-import edu.mdc.capstone.musicapp.modals.Post;
+import edu.mdc.capstone.musicapp.models.Post;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
