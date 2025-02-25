@@ -1,4 +1,4 @@
-package edu.mdc.capstone.musicapp.modals;
+package edu.mdc.capstone.musicapp.models;
 
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
