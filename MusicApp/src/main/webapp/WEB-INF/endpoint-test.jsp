@@ -45,8 +45,6 @@
 	</div>
     <script type="text/javascript">
 		
-		const ENDPOINT_HOST = "https://secure-darling-minnow.ngrok-free.app/"
-		
         window.onload = function() {
             // Event listener for form submission (upload audio file)
             document.getElementById('uploadForm').addEventListener('submit', function(e) {
@@ -61,7 +59,7 @@
                 document.getElementById('music-sheet').style.display = 'none';
 
                 // Make POST request to the upload endpoint
-                fetch(`${ENDPOINT_HOST}/upload-audio`, {
+                fetch(`https://secure-darling-minnow.ngrok-free.app/upload-audio`, {
                     method: 'POST',
                     body: formData
                 })
@@ -86,6 +84,14 @@
                 });
             });
 
+			const requestOptions = {
+			  method: "GET",
+			  
+			  headers: {
+			       "ngrok-skip-browser-warning": "true"
+			  }
+			};
+
             // Event listener for the "Fetch Data" button
             document.getElementById('fetchDataBtn').addEventListener('click', function(e) {
                 e.preventDefault(); // Prevent any default action
@@ -95,14 +101,10 @@
                 document.getElementById('music-sheet').style.display = 'none';
 
                 // Make a GET request to the /test-data endpoint
-                fetch("https://secure-darling-minnow.ngrok-free.app/test-data", {
-                    method: 'GET',
-					headers: {
-					     "ngrok-skip-browser-warning": "true"
-					}
-                })
+				fetch("https://secure-darling-minnow.ngrok-free.app/test-data", requestOptions)
                 .then(response => response.json()) // Parse JSON response
                 .then(data => {
+					
                     // Hide loading spinner and show music sheet area
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('music-sheet').style.display = 'block';
