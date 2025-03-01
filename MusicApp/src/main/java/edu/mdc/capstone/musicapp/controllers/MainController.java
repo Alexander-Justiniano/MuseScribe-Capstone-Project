@@ -16,6 +16,12 @@ public class MainController {
 		return "index.jsp";
 	}
 	
+	
+	@GetMapping("/endpoint-test")
+	public String testPage() {
+		return "endpoint-test.jsp";
+	}
+	
 //	*************************************************************** GET Requests ***************************************************************
 }
 //Victoria was here
