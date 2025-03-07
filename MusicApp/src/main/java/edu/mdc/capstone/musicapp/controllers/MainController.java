@@ -8,6 +8,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class MainController {
 
+/*	TODO: 
+	
+		-Add routes for additional end points
+		-Add routes for uploading midi files
+		-Secure Routes
+		-Work on session information for end user
+		 
+
+*/
 	
 //	*************************************************************** GET Requests ***************************************************************
 	
@@ -16,6 +25,12 @@ public class MainController {
 		return "index.jsp";
 	}
 	
-//	*************************************************************** GET Requests ***************************************************************
+	@GetMapping("/login")
+	public String login() {
+		return "login.jsp";
+	}
+	
+//	*************************************************************** POST Requests ***************************************************************
+
+	
 }
-//Victoria was here
