@@ -25,5 +25,19 @@ public class MainController {
 		return "index.jsp";
 	}
 	
+	@GetMapping("/login")
+	public String login() {
+		return "login.jsp";
+	}
+	
+//	*************************************************************** POST Requests ***************************************************************
+
+		
+	@GetMapping("/endpoint-test")
+	public String testPage() {
+		return "endpoint-test.jsp";
+	}
+	
+//	*************************************************************** GET Requests ***************************************************************
 
 }
