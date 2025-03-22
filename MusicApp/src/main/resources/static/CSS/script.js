@@ -13,7 +13,7 @@ document.getElementById('recordButton').addEventListener('click', () => {
 	document.getElementById('recordButton').classList.toggle('bg-red-100');
 });
 
-document.getElementById('playButton').addEventListener('click', () => {
+/*document.getElementById('playButton').addEventListener('click', () => {
 	isPlaying = !isPlaying;
 	const icon = document.getElementById('playButton').querySelector('i');
 	if (isPlaying) {
@@ -22,11 +22,11 @@ document.getElementById('playButton').addEventListener('click', () => {
 		icon.setAttribute('data-feather', 'play');
 	}
 	feather.replace();
-});
+});*/
 
 // Range input styling
-const range = document.querySelector('input[type="range"]');
-range.style.accentColor = '#4f46e5';
+//const range = document.querySelector('input[type="range"]');
+//range.style.accentColor = '#4f46e5';
 
 //Dropdown Menu
 document.addEventListener("DOMContentLoaded", function () {
@@ -80,139 +80,147 @@ tooltipBtn.addEventListener('mouseleave', () => {
 
 //--------------------------------------------------------Upload Audio--------------------------------------------------------//
 
+$(document).ready(function() {
 
+  // --- Helper HTML Templates ---
+  function defaultModalHTML() {
+    return `
+      <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true"
+           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                 d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+      </svg>
+      <p class="mb-2 text-sm text-gray-500">
+         <span class="font-semibold">Click to upload</span> or drag and drop
+      </p>
+      <p class="text-xs text-gray-500">Only .wav or .mp3 files accepted</p>
+    `;
+  }
 
-window.onload = function() {
-		// Event listener for form submission (upload audio file)
-	document.getElementById('uploadForm').addEventListener('submit', function(e) {
-	  e.preventDefault(); // Prevent the default form submission (page reload)
-	
-	  var fileInput = document.getElementById('modal-dropzone-file');// file input field
-	  console.log(fileInput.files[0])
-	  var formData = new FormData();
-	  formData.append('file', fileInput.files[0]);
-	
-	  // Show loading spinner and hide the music sheet area during processing
-	  document.getElementById('loading').style.display = 'block';
-	  //document.getElementById('music-sheet').style.display = 'none';
-	
-	  // close modal on upload
-	  const uploadModal = document.getElementById('uploadModal');
-      uploadModal.classList.add('hidden');
+  function getErrorHTML() {
+    return `
+      <i data-feather="x" class="w-8 h-8 mb-4 text-red-500"></i>
+      <p class="mb-2 text-sm text-red-500">
+         <span class="font-semibold">Error:</span> Invalid file type.
+      </p>
+      <p class="text-xs text-red-500">Please upload a .wav or .mp3 file.</p>
+    `;
+  }
 
-	  
-      // Make POST request to the upload endpoint
-      fetch(`https://secure-darling-minnow.ngrok-free.app/upload`, {
-          method: 'POST',
-          body: formData
-      })
-      .then(response => response.json()) // Parse the JSON response
-      .then(data => {
-          // Hide loading spinner and show the music sheet area
-          document.getElementById('loading').style.display = 'none';
-          document.getElementById('music-sheet').style.display = 'block';
+  function getSuccessHTML(fileName, actionMsg) {
+    return `
+      <i data-feather="check" class="w-8 h-8 mb-4 text-green-500"></i>
+      <p class="mb-2 text-sm text-gray-500">
+         <span class="font-semibold">File ready:</span> ${fileName}
+      </p>
+      <p class="text-xs text-gray-500">${actionMsg}</p>
+    `;
+  }
 
-          // Check for ABC notation data in the response under transcription.abc_notation
-          if (data.transcription && data.transcription.abc_notation) {
-              var abcString = data.transcription.abc_notation;
-              // Render the ABC notation into sheet music using ABC.js
-              ABCJS.renderAbc("music-sheet", abcString,{ responsive: "resize" });
-          } else {
-              alert("Transcription failed: " + data.error);
-          }
-      })
-      .catch(error => {
-          console.error('Error:', error);
-          document.getElementById('loading').style.display = 'none';
+  // --- Modal Drop Zone Reset ---
+  function resetModalDropZone() {
+    $('#modal-dropzone-file').val('');
+    $('#modalDropZone').removeClass('dragerror dragover');
+    $('#modalDropZoneContent').html(defaultModalHTML());
+    $('#modalUploadButtonContainer').hide();
+  }
+
+  // --- Initialize ABC.js Audio Controls ---
+  function initSynthControls() {
+    if (ABCJS.synth.supportsAudio() && !window.synthControl) {
+      window.synthControl = new ABCJS.synth.SynthController();
+      window.synthControl.load("#audio-controls", null, {
+        displayLoop: true,
+        displayRestart: true,
+        displayPlay: true,
+        displayProgress: true,
+        displayWarp: true
       });
-  	});
+    }
+  }
 
-	const requestOptions = {
-	  method: "GET",
-	  
-	  headers: {
-	       "ngrok-skip-browser-warning": "true"
-	  }
-	};
+  // --- Update Music Sheet and Audio Controls ---
+  function updateSheetMusic(abcString) {
+    $('#loading').hide();
+    $('#music-sheet').show();
+    if (abcString) {
+      var visualObj = ABCJS.renderAbc("music-sheet", abcString, {
+        responsive: "resize",
+        dragging: true
+      })[0];
+      if (ABCJS.synth.supportsAudio()) {
+        if (!window.synthControl) { initSynthControls(); }
+        window.synthControl.setTune(visualObj, false);
+      }
+    } else {
+      alert("Transcription failed.");
+    }
+  }
 
-      // Event listener for the "Fetch Data" button
-      document.getElementById('fetchDataBtn').addEventListener('click', function(e) {
-          e.preventDefault(); // Prevent any default action
+  // --- Initialize controls on page load ---
+  initSynthControls();
 
-          // Show loading spinner and hide music sheet area during processing
-          document.getElementById('loading').style.display = 'block';
-          document.getElementById('music-sheet').style.display = 'none';
+  // --- Upload Form Submission ---
+  $('#uploadForm').on('submit', function(e) {
+    e.preventDefault();
+    var file = $('#modal-dropzone-file')[0].files[0];
+    if (!file) { return; }
+    var formData = new FormData();
+    formData.append('file', file);
 
-          // Make a GET request to the /test-data endpoint
-		fetch("https://secure-darling-minnow.ngrok-free.app/test-data", requestOptions)
-          .then(response => response.json()) // Parse JSON response
-          .then(data => {
-			
-              // Hide loading spinner and show music sheet area
-              document.getElementById('loading').style.display = 'none';
-              document.getElementById('music-sheet').style.display = 'block';
+    // Show spinner, hide music sheet, and close the modal
+    $('#loading').show();
+    $('#music-sheet').hide();
+    $('#uploadModal').addClass('hidden');
 
-              // Check if the returned JSON contains ABC notation
-              if (data.transcription && data.transcription.abc_notation) {
-                  var abcString = data.transcription.abc_notation;
-                  // Render the ABC notation using ABC.js
-                  var visualObj = ABCJS.renderAbc("music-sheet", abcString,{ responsive: "resize",dragging: true })[0];
-				  var midi = ABCJS.synth.getMidiFile(abcString, { chordsOff: true, midiOutputType: "encoded" });
-				  
-				  document.getElementById("midi-link").setAttribute("html", midi);
-	
-				    if (ABCJS.synth.supportsAudio()) {
-				      // Create a synth controller instance and store it globally.
-				      synthControl = new ABCJS.synth.SynthController();
-				      // We don't call synthControl.load() so that we can use our custom controls.
-				      // Instead, we simply set the tune.
-				      synthControl.setTune(visualObj, false).then(function () {
-				        console.log("Tune is ready for playback");
-				      }).catch(function (error) {
-				        console.error("Error setting tune:", error);
-				      });
-				    } else {
-				      document.querySelector("#audio").innerHTML = "<div class='audio-error'>Audio is not supported in this browser.</div>";
-				    }
-				
+    // POST file to the upload endpoint
+    fetch('https://secure-darling-minnow.ngrok-free.app/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+      resetModalDropZone();
+      if (data.transcription && data.transcription.abc_notation) {
+        updateSheetMusic(data.transcription.abc_notation);
+      } else {
+        alert("Transcription failed: " + (data.error || "unknown error"));
+        $('#loading').hide();
+        $('#music-sheet').show();
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      $('#loading').hide();
+    });
+  });
 
+  // --- Fetch Test Data Button ---
+  $('#fetchDataBtn').on('click', function(e) {
+    e.preventDefault();
+    $('#loading').show();
+    $('#music-sheet').hide();
+    fetch("https://secure-darling-minnow.ngrok-free.app/test-data", {
+      method: "GET",
+      headers: { "ngrok-skip-browser-warning": "true" }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.transcription && data.transcription.abc_notation) {
+        updateSheetMusic(data.transcription.abc_notation);
+      } else {
+        alert("Failed to fetch test data: " + (data.error || "unknown error"));
+        $('#loading').hide();
+        $('#music-sheet').show();
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      $('#loading').hide();
+    });
+  });
 
-				  // Play button (with id "playButton" and classes "abcjs-midi-start abcjs-btn")
-				  document.getElementById("playButton").addEventListener("click", function () {
-				    if (synthControl) {
-				      synthControl.play();
-				    }
-				  });
+});
 
-				  // Stop button – make sure your HTML stop button has an id "stopButton"
-				  document.getElementById("stopButton").addEventListener("click", function () {
-				    if (synthControl) {
-				      synthControl.stop();
-				    }
-				  });
-
-	
-				  
-              } else {
-                  alert("Failed to fetch test data: " + data.error);
-              }
-          })
-          .catch(error => {
-              console.error('Error:', error);
-              document.getElementById('loading').style.display = 'none';
-          });
-      });
-  
-
-
-
-
-
-	  
-
-
-	  
-	  
-}
 
 

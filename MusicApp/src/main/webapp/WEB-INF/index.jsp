@@ -32,7 +32,7 @@
      <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js"></script>
 	 <link href="https://www.abcjs.net/abcjs-audio.css" media="all" rel="stylesheet" type="text/css">
 	 <script src="https://www.abcjs.net/abcjs-basic-min.js"></script>
-	 
+	 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 	 
  </head>
  <style>
@@ -46,6 +46,10 @@
      background-color: #fee2e2 !important; /* Tailwind red-200 */
      border-color: #f87171 !important;     /* Tailwind red-400 */
    }
+   .abcjs-midi-tempo{
+	color:#454545;
+   }
+   
  </style>
  <body class="bg-gray-50 min-h-screen p-8">
      <div class="max-w-6xl mx-auto space-y-6">
@@ -86,7 +90,7 @@
                      <button class="p-2 rounded-lg hover:bg-gray-300 relative" id="recordButton">
                          <i data-feather="mic" class="w-5 h-5"></i>
                      </button>
-                     <div class="tooltip absolute hidden bg-black text-white text-xs rounded-md px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 transition-opacity duration-300">
+                    <!-- <div class="tooltip absolute hidden bg-black text-white text-xs rounded-md px-2 py-1 -top-8 left-1/2 transform -translate-x-1/2 opacity-0 transition-opacity duration-300">
                          Button
                      </div>
                      <button class="p-2 rounded-lg hover:bg-gray-300 abcjs-midi-start abcjs-btn" id="playButton">
@@ -94,7 +98,7 @@
                      </button>
                      <button class="p-2 rounded-lg hover:bg-gray-300 abcjs-midi-stop abcjs-btn" id="stopButton">
                          <i data-feather="square" class="w-5 h-5"></i>
-                     </button>
+                     </button>-->
                      <button class="p-2 upload-button rounded-lg hover:bg-gray-300">
                          <i data-feather="upload" class="w-5 h-5"></i>
                      </button>
@@ -102,28 +106,23 @@
                      <span class="p-2 text-lg inline-block w-13 truncate">Track Name Placeholder</span>
                  </div>
 
-                 <!-- Waveform -->
-                 <div class="waveform-placeholder h-32 rounded-lg border border-gray-200"></div>
+                 <!-- Waveform
+                 <div class="waveform-placeholder h-32 rounded-lg border border-gray-200"></div> -->
 
-                 <!-- Timeline -->
-                 <div class="space-y-2">
-                     <input type="range" class="w-full" value="33">
-                     <div class="flex justify-between text-sm text-gray-500">
-                         <span>0:00</span>
-                         <span>3:45</span>
-                     </div>
-                 </div>
+				 <div id="audio-controls"></div>
+                 <!-- Timeline/Controls -->
+
              </div>
 
              <!-- Sheet Music -->
              <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
                  <h2 class="text-xl font-semibold text-gray-900">Sheet Music</h2>
 
-                 <div id="music-sheet" class="sheet-music-placeholder h-64 rounded-lg border border-gray-200">
+                 <div id="music-sheet" class="sheet-music-placeholder h-64 rounded-lg border border-gray-200 flex justify-center">
 					<!-- Loading indicator shown while processing requests -->
-					<div id="loading" style="display:none;">
+					<div id="loading" class="flex items-center" style="display:none;">
 					    <p>Processing... Please wait.</p>
-					    <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading...">
+					    <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading..." class="w-6 ml-2">
 					</div>
 				 </div>
                  <div class="flex gap-2">
@@ -131,9 +130,9 @@
                          <i data-feather="edit-2" class="w-5 h-5"></i>
                      </button>
 					
-                     <a id="midi-link" download="myfile.midi" href="" class="p-2 rounded-lg hover:bg-gray-300">
+                     <button id="midi-link" class="p-2 rounded-lg hover:bg-gray-300">
                          <i data-feather="download" class="w-5 h-5"></i>
-                     </a>
+                     </button>
 					
                  </div>
              </div>
@@ -218,266 +217,139 @@
 		        </div>
 		    </div>
 
-			<div id="audio"><div class="abcjs-inline-audio">
-			<button type="button" class="abcjs-midi-reset abcjs-btn" title="Click to go to beginning." aria-label="Click to go to beginning.">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25">
-			  <g>
-			    <polygon points="5 12.5 24 0 24 25"></polygon>
-			    <rect width="3" height="25" x="0" y="0"></rect>
-			  </g>
-			</svg>
-			</button>
-			<button type="button" class="abcjs-midi-start abcjs-btn" title="Click to play/pause." aria-label="Click to play/pause.">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" class="abcjs-play-svg">
-			    <g>
-			    <polygon points="4 0 23 12.5 4 25"></polygon>
-			    </g>
-			</svg>
-
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" class="abcjs-pause-svg">
-			  <g>
-			    <rect width="8.23" height="25"></rect>
-			    <rect width="8.23" height="25" x="17"></rect>
-			  </g>
-			</svg>
-
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="abcjs-loading-svg">
-			    <circle cx="50" cy="50" fill="none" stroke-width="20" r="35" stroke-dasharray="160 55"></circle>
-			</svg>
-			</button>
-			<button type="button" class="abcjs-midi-progress-background" title="Click to change the playback position." aria-label="Click to change the playback position."><span class="abcjs-midi-progress-indicator" style="left: 5.54651px;"></span></button>
-			<span class="abcjs-midi-clock">0:00</span>
-			<div class="abcjs-css-warning" style="font-size: 12px;color:red;border: 1px solid red;text-align: center;width: 300px;margin-top: 4px;font-weight: bold;border-radius: 4px;">CSS required: load abcjs-audio.css</div></div>
-			</div>
-			
-			<p class="suspend-explanation">Browsers won't allow audio to work unless the audio is started in response to a
-					user action. This prevents auto-playing web sites. Therefore, the
-					following button is needed to do the initialization:</p>
-				<div class="row">
-					<div>
-						<button class="activate-audio">Activate Audio Context And Play</button>
-						<button class="stop-audio" style="display:none;">Stop Audio</button>
-						<div class='audio-error' style="display:none;">Audio is not supported in this browser.</div>
-					</div>
-					<div class="status"></div>
-				</div>
-			
+		
 		    <!-- Inline Scripts -->
 		    <script>
-		        // Utility function to check if the file extension is .wav or .mp3
-		        function isValidAudio(file) {
-		            return /\.(wav|mp3)$/i.test(file.name);
-		        }
+				
+				$(document).ready(function() {
+				  // Default HTML templates
+				  function defaultModalHTML() {
+				    return `
+				      <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true"
+				           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+				           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+				                 d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+				      </svg>
+				      <p class="mb-2 text-sm text-gray-500">
+				         <span class="font-semibold">Click to upload</span> or drag and drop
+				      </p>
+				      <p class="text-xs text-gray-500">Only .wav or .mp3 files accepted</p>
+				    `;
+				  }
 
-		        // Function to reset drop zone to its default content
-		        function resetModalDropZone() {
-		            modalDropZone.classList.remove('dragerror');
-		            modalDropZoneContent.innerHTML = `
-		                <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true"
-		                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-		                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-		                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-		                </svg>
-		                <p class="mb-2 text-sm text-gray-500">
-		                    <span class="font-semibold">Click to upload</span> or drag and drop
-		                </p>
-		                <p class="text-xs text-gray-500">Only .wav or .mp3 files accepted</p>
-		            `;
-		        }
+				  function getErrorHTML() {
+				    return `
+				      <i data-feather="x" class="w-8 h-8 mb-4 text-red-500"></i>
+				      <p class="mb-2 text-sm text-red-500">
+				         <span class="font-semibold">Error:</span> Invalid file type.
+				      </p>
+				      <p class="text-xs text-red-500">Please upload a .wav or .mp3 file.</p>
+				    `;
+				  }
 
-		        // Open modal when the icon upload button is clicked
-		        const uploadIconButton = document.querySelector('.upload-button');
-		        const uploadModal = document.getElementById('uploadModal');
-		        const closeModal = document.getElementById('closeModal');
+				  function getSuccessHTML(fileName, actionMsg) {
+				    return `
+				      <i data-feather="check" class="w-8 h-8 mb-4 text-green-500"></i>
+				      <p class="mb-2 text-sm text-gray-500">
+				         <span class="font-semibold">File ready:</span> ${fileName}
+				      </p>
+				      <p class="text-xs text-gray-500">${actionMsg}</p>
+				    `;
+				  }
 
-		        uploadIconButton.addEventListener('click', () => {
-		            uploadModal.classList.remove('hidden');
-		        });
+				  // Resets the modal drop zone to its default state
+				  function resetModalDropZone() {
+				    $('#modal-dropzone-file').val('');
+				    $('#modalDropZone').removeClass('dragerror dragover');
+				    $('#modalDropZoneContent').html(defaultModalHTML());
+				    $('#modalUploadButtonContainer').css('display', 'none');
+				  }
 
-		        // Close modal when the close button is clicked or clicking outside modal content
-		        closeModal.addEventListener('click', () => {
-		            uploadModal.classList.add('hidden');
-		        });
+				  // Generic file handler for drop and change events
+				  function updateDropZone($zone, $content, $button, file, successMsg, errorResetCb) {
+				    if (!/\.(wav|mp3)$/i.test(file.name)) {
+				      $zone.addClass('dragerror');
+				      $content.html(getErrorHTML());
+				      setTimeout(errorResetCb, 2000);
+				      return false;
+				    }
+				    $content.html(getSuccessHTML(file.name, successMsg));
+				    $button.css('display', 'flex');
+				    if (typeof feather !== 'undefined') { feather.replace(); }
+				    return true;
+				  }
 
-		        uploadModal.addEventListener('click', (e) => {
-		            if (e.target === uploadModal) {
-		                uploadModal.classList.add('hidden');
-		            }
-		        });
+				  // Helper to add drag events
+				  function addDragEvents($zone) {
+				    $zone.on('dragenter dragover', function(e) {
+				      e.preventDefault();
+				      $(this).addClass('dragover');
+				    }).on('dragleave', function(e) {
+				      e.preventDefault();
+				      $(this).removeClass('dragover');
+				    });
+				  }
 
-		        // Modal Drag-and-Drop Functionality
-		        const modalDropZone = document.getElementById('modalDropZone');
-		        const modalDropZoneContent = document.getElementById('modalDropZoneContent');
-		        const modalUploadButtonContainer = document.getElementById('modalUploadButtonContainer');
-		        const modalFileInput = document.getElementById('modal-dropzone-file');
+				  // Modal open/close events with reset on close
+				  $('.upload-button').on('click', () => $('#uploadModal').removeClass('hidden'));
+				  
+				  $('#closeModal').on('click', function() {
+				    $('#uploadModal').addClass('hidden');
+				    resetModalDropZone();
+				  });
+				  
+				  $('#uploadModal').on('click', function(e) {
+				    if (e.target.id === 'uploadModal') {
+				      $(this).addClass('hidden');
+				      resetModalDropZone();
+				    }
+				  });
 
-		        function handleModalDragOver(e) {
-		            e.preventDefault();
-		            modalDropZone.classList.add('dragover');
-		        }
-		        function handleModalDragLeave(e) {
-		            e.preventDefault();
-		            modalDropZone.classList.remove('dragover');
-		        }
-		        function handleModalDrop(e) {
-		            e.preventDefault();
-		            modalDropZone.classList.remove('dragover');
-		            const files = e.dataTransfer.files;
-		            if (files && files.length > 0) {
-		                const file = files[0];
-		                if (!isValidAudio(file)) {
-		                    // Apply error style and update content
-		                    modalDropZone.classList.add('dragerror');
-		                    modalDropZoneContent.innerHTML = `
-		                        <i data-feather="x" class="w-8 h-8 mb-4 text-red-500"></i>
-		                        <p class="mb-2 text-sm text-red-500">
-		                            <span class="font-semibold">Error:</span> Invalid file type.
-		                        </p>
-		                        <p class="text-xs text-red-500">Please upload a .wav or .mp3 file.</p>
-		                    `;
-		                    // Reset error state after 2 seconds
-		                    setTimeout(resetModalDropZone, 2000);
-		                    return;
-		                }
-		                modalDropZoneContent.innerHTML = `
-		                    <i data-feather="check" class="w-8 h-8 mb-4 text-green-500"></i>
-		                    <p class="mb-2 text-sm text-gray-500">
-		                        <span class="font-semibold">File ready:</span> ${file.name}
-		                    </p>
-		                    <p class="text-xs text-gray-500">File has been dropped.</p>
-		                `;
-		                modalUploadButtonContainer.style.display = 'flex';
-		                if (typeof feather !== 'undefined') {
-		                    feather.replace();
-		                }
-		            }
-		        }
+				  // Modal drop zone events
+				  addDragEvents($('#modalDropZone'));
+				  
+				  $('#modalDropZone').on('drop', function(e) {
+				    e.preventDefault();
+				    $(this).removeClass('dragover');
+				    var files = e.originalEvent.dataTransfer.files;
+				    if (files.length) {
+				      updateDropZone($(this), $('#modalDropZoneContent'), $('#modalUploadButtonContainer'),
+				                     files[0], 'File has been dropped.', resetModalDropZone);
+				    }
+				  });
+				  
+				  $('#modal-dropzone-file').on('change', function() {
+				    var files = this.files;
+				    if (files.length) {
+				      updateDropZone($('#modalDropZone'), $('#modalDropZoneContent'), $('#modalUploadButtonContainer'),
+				                     files[0], 'File has been selected.', resetModalDropZone);
+				    }
+				  });
 
-		        modalDropZone.addEventListener('dragenter', handleModalDragOver);
-		        modalDropZone.addEventListener('dragover', handleModalDragOver);
-		        modalDropZone.addEventListener('dragleave', handleModalDragLeave);
-		        modalDropZone.addEventListener('drop', handleModalDrop);
+				  // Main drop zone events
+				  $('#dropzone-file').attr('accept', '.wav,.mp3');
+				  addDragEvents($('#dropZone'));
+				  
+				  $('#dropZone').on('drop', function(e) {
+				    e.preventDefault();
+				    $(this).removeClass('dragover');
+				    var files = e.originalEvent.dataTransfer.files;
+				    if (files.length) {
+				      updateDropZone($(this), $('#dropZoneContent'), $('#uploadButtonContainer'),
+				                     files[0], 'File has been dropped.', () => $(this).removeClass('dragerror'));
+				    }
+				  });
+				  
+				  $('#dropzone-file').on('change', function() {
+				    var files = this.files;
+				    if (files.length) {
+				      updateDropZone($('#dropZone'), $('#dropZoneContent'), $('#uploadButtonContainer'),
+				                     files[0], 'File has been selected.', () => $('#dropZone').removeClass('dragerror'));
+				    }
+				  });
+				});
 
-		        modalFileInput.addEventListener('change', function () {
-		            const files = modalFileInput.files;
-		            if (files && files.length > 0) {
-		                const file = files[0];
-		                if (!isValidAudio(file)) {
-		                    modalDropZone.classList.add('dragerror');
-		                    modalDropZoneContent.innerHTML = `
-		                        <i data-feather="x" class="w-8 h-8 mb-4 text-red-500"></i>
-		                        <p class="mb-2 text-sm text-red-500">
-		                            <span class="font-semibold">Error:</span> Invalid file type.
-		                        </p>
-		                        <p class="text-xs text-red-500">Please upload a .wav or .mp3 file.</p>
-		                    `;
-		                    setTimeout(resetModalDropZone, 2000);
-		                    return;
-		                }
-		                modalDropZoneContent.innerHTML = `
-		                    <i data-feather="check" class="w-8 h-8 mb-4 text-green-500"></i>
-		                    <p class="mb-2 text-sm text-gray-500">
-		                        <span class="font-semibold">File ready:</span> ${file.name}
-		                    </p>
-		                    <p class="text-xs text-gray-500">File has been selected.</p>
-		                `;
-		                modalUploadButtonContainer.style.display = 'flex';
-		                if (typeof feather !== 'undefined') {
-		                    feather.replace();
-		                }
-		            }
-		        });
 
-		        // (Optional) Main page file input update if needed
-		        const dropZone = document.getElementById('dropZone');
-		        const dropZoneContent = document.getElementById('dropZoneContent');
-		        const uploadButtonContainer = document.getElementById('uploadButtonContainer');
-		        const fileInput = document.getElementById('dropzone-file');
-
-		        // Ensure the main file input only accepts .wav and .mp3 files
-		        fileInput.setAttribute('accept', '.wav,.mp3');
-
-		        function handleDragOver(event) {
-		            event.preventDefault();
-		            dropZone.classList.add('dragover');
-		        }
-		        function handleDragLeave(event) {
-		            event.preventDefault();
-		            dropZone.classList.remove('dragover');
-		        }
-		        function handleDrop(event) {
-		            event.preventDefault();
-		            dropZone.classList.remove('dragover');
-		            const files = event.dataTransfer.files;
-		            if (files && files.length > 0) {
-		                const file = files[0];
-		                if (!isValidAudio(file)) {
-		                    dropZone.classList.add('dragerror');
-		                    dropZoneContent.innerHTML = `
-		                        <i data-feather="x" class="w-8 h-8 mb-4 text-red-500"></i>
-		                        <p class="mb-2 text-sm text-red-500">
-		                            <span class="font-semibold">Error:</span> Invalid file type.
-		                        </p>
-		                        <p class="text-xs text-red-500">Please upload a .wav or .mp3 file.</p>
-		                    `;
-		                    setTimeout(() => {
-		                        dropZone.classList.remove('dragerror');
-		                        // Optionally reset dropZoneContent to its default state here.
-		                    }, 2000);
-		                    return;
-		                }
-		                dropZoneContent.innerHTML = `
-		                    <i data-feather="check" class="w-8 h-8 mb-4 text-green-500"></i>
-		                    <p class="mb-2 text-sm text-gray-500">
-		                        <span class="font-semibold">File ready:</span> ${file.name}
-		                    </p>
-		                    <p class="text-xs text-gray-500">File has been dropped.</p>
-		                `;
-		                uploadButtonContainer.style.display = 'flex';
-		                if (typeof feather !== 'undefined') {
-		                    feather.replace();
-		                }
-		            }
-		        }
-
-		        dropZone.addEventListener('dragenter', handleDragOver);
-		        dropZone.addEventListener('dragover', handleDragOver);
-		        dropZone.addEventListener('dragleave', handleDragLeave);
-		        dropZone.addEventListener('drop', handleDrop);
-
-		        fileInput.addEventListener('change', function (event) {
-		            const files = fileInput.files;
-						console.log("file: ",file)
-		            if (files && files.length > 0) {
-		                const file = files[0];
-		                if (!isValidAudio(file)) {
-		                    dropZone.classList.add('dragerror');
-		                    dropZoneContent.innerHTML = `
-		                        <i data-feather="x" class="w-8 h-8 mb-4 text-red-500"></i>
-		                        <p class="mb-2 text-sm text-red-500">
-		                            <span class="font-semibold">Error:</span> Invalid file type.
-		                        </p>
-		                        <p class="text-xs text-red-500">Please upload a .wav or .mp3 file.</p>
-		                    `;
-		                    setTimeout(() => {
-		                        dropZone.classList.remove('dragerror');
-		                        // Optionally reset dropZoneContent here.
-		                    }, 2000);
-		                    return;
-		                }
-		                dropZoneContent.innerHTML = `
-		                    <i data-feather="check" class="w-8 h-8 mb-4 text-green-500"></i>
-		                    <p class="mb-2 text-sm text-gray-500">
-		                        <span class="font-semibold">File ready:</span> ${file.name}
-		                    </p>
-		                    <p class="text-xs text-gray-500">File has been selected.</p>
-		                `;
-		                uploadButtonContainer.style.display = 'flex';
-		                if (typeof feather !== 'undefined') {
-		                    feather.replace();
-		                }
-		            }
-		        });
 		    </script>
 		    <script src="/css/script.js"></script>
 	</body>
