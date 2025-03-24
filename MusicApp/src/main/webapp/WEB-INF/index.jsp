@@ -58,13 +58,42 @@ color:#454545;
     background-color: #d54c4c;
 }
 
+.sm-sheet-card{
+	display: inline-flex !important;
+	padding: 0 !important;
+	width: 130px !important;
+	height: 152px;
+	justify-content: center;
+	background: #fff;
+	border: 1pt solid #454545;
+	opacity:65%;
+	cursor:pointer;
+	position:relative;
+}
+.sm-sheet-card:hover{
+	opacity:100%; 
+}
+
+.sm-sheet-card::before {
+	content:'';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  z-index: 10; /* Ensure it's above the canvas */
+}
+
 </style>
 <body class="bg-gray-50 min-h-screen p-8">
+	<h2>Welcome, ${user.name} [${user.id}]</h2>
+
 	<div class="max-w-6xl mx-auto space-y-6">
 
 		<!-- Header -->
 		<div class="flex justify-between items-center">
-			<h1 class="text-3xl font-bold text-gray-900">MuseScribe</h1>
+			<img src="/IMGS/musescribe-logo.svg" alt="MuseScribe Logo" class="w-60">
 			<div>
 				<!-- TODO: Add Dark Mode feature button -->
 				<div>
@@ -100,9 +129,25 @@ color:#454545;
 					</div>
 				</div>
 				
+				<!-- User Music Sheets -->
+				<div>
+				    
+				    <div id='music-sheet-carousel'>
+						<h3>Saved Sheet Music</h3>
+						<ul class="flex gap-4">
+							<c:forEach var="sheet" items="${musicSheets}" varStatus="status">
+							  
+								<li class='sm-sheet-card overflow-hidden rounded' id='sheet-music-${status.index + 1}' data-sheet-idx='${status.index}' data-musicsheet-data='${sheet.abcNotation}' data-musicsheet-title='${sheet.title}'>${sheet.title}</li>
+									
+							</c:forEach>
+						</ul>
+					</div>
+				</div>				
+				
+				
+				<!-- ABC.js Audio Controls -->
 				<div class=" sticky bottom-0 rounded pb-4 "> 
 					<div class="bg-gray-50 shadow rounded px-3 pt-3 "> 
-					<!-- ABC.js Audio Controls -->
 					<div id="audio-controls"></div>
 					<!--Buttons-->
 					<div class="flex flex-col pt-3">
@@ -226,54 +271,120 @@ color:#454545;
 				</form>
 			</div>
 		</div>
-<script>
-	$(document).ready(function () {
-	  $('.button-wrapper button').hover(
-	    function () {
-	      // Get tooltip text from data attribute
-	      const tooltipText = $(this).data('tooltip');
-	      if (!tooltipText) return;
-	      // Create tooltip element
-	      const $tooltip = $('<div class="custom-tooltip"></div>')
-	        .text(tooltipText)
-	        .css({
-	          position: 'absolute',
-	          background: 'rgba(0, 0, 0, 0.7)',
-	          color: '#fff',
-	          padding: '4px 8px',
-	          'border-radius': '3px',
-	          'font-size': '12px',
-	          'z-index': 1000,
-	          display: 'none'
-	        });
-	      $('body').append($tooltip);
-	      // Position tooltip centered above the button
-	      const $btn = $(this);
-	      const offset = $btn.offset();
-	      const left = offset.left + $btn.outerWidth()/2 - $tooltip.outerWidth()/2;
-	      const top = offset.top - $tooltip.outerHeight() - 5;
-	      $tooltip.css({ left: left, top: top });
-	      $tooltip.fadeIn(200);
-	      $btn.data('tooltipElement', $tooltip);
-	    },
-	    function () {
-	      // Remove tooltip on mouse leave
-	      const $tooltip = $(this).data('tooltipElement');
-	      if ($tooltip) {
-	        $tooltip.fadeOut(200, function () {
-	          $(this).remove();
-	        });
-	      }
-	    }
-	  );
-	});
 
-</script>
 	
 		<!-- Inline Scripts -->
 		<script src="/JS/modal-script.js"></script>
 		<script src="/JS/recorder.js"></script>
 		<script src="/JS/upload-audio.js"></script>
 		<script src="/css/script.js"></script>
+		
+		<script>
+			
+			
+			
+			$(document).ready(function () {
+				function initSynthControls() {
+
+				  if (ABCJS.synth.supportsAudio() && !window.synthControl) {
+				    window.synthControl = new ABCJS.synth.SynthController();
+				    window.synthControl.load('#audio-controls', null, {
+				      displayLoop: true,
+				      displayRestart: true,
+				      displayPlay: true,
+				      displayProgress: true,
+				      displayWarp: true,
+				    });
+				  }
+				}
+					
+				// render sheet music to specific element by id
+				function renderSheetMusicById(element_id, abcString) {	
+
+				  if (abcString) {
+				    // Render sheet music
+				    var visualObj = ABCJS.renderAbc(element_id, abcString, {
+				      responsive: 'resize',
+				      dragging: false,
+				    })[0];
+
+				    // Reuse existing audio controls
+				    if (ABCJS.synth.supportsAudio() && window.synthControl) {
+				      window.synthControl.setTune(visualObj, false);
+				    }
+				  } else {
+				    alert('Transcription failed.');
+				  }
+				}
+				
+				let musicSheetList = [];
+				
+				$('#music-sheet-carousel').each(function(){
+					$(this).find('li').each(function(){
+						var current = $(this);
+						musicSheetList.push({
+							sheet_music_title:current.data('musicsheet-title'),
+							sheet:current.data('musicsheet-data')
+						})
+					})
+				})
+		
+				for (var i = 0; i < musicSheetList.length; i++) {
+					const currentIdx = i+1;
+					renderSheetMusicById('sheet-music-'+currentIdx,musicSheetList[i].sheet)
+				} 
+				
+				
+				$('.sm-sheet-card').on('click', function(){
+					console.log("support: ", ABCJS.synth.supportsAudio())
+					console.log("window: ", !window.synthControl)
+					initSynthControls()
+					renderSheetMusicById('music-sheet',$(this).data('musicsheet-data'))
+				})
+				
+			})
+			
+			$(document).ready(function () {
+			  $('.button-wrapper button').hover(
+			    function () {
+			      // Get tooltip text from data attribute
+			      const tooltipText = $(this).data('tooltip');
+			      if (!tooltipText) return;
+			      // Create tooltip element
+			      const $tooltip = $('<div class="custom-tooltip"></div>')
+			        .text(tooltipText)
+			        .css({
+			          position: 'absolute',
+			          background: 'rgba(0, 0, 0, 0.7)',
+			          color: '#fff',
+			          padding: '4px 8px',
+			          'border-radius': '3px',
+			          'font-size': '12px',
+			          'z-index': 1000,
+			          display: 'none'
+			        });
+			      $('body').append($tooltip);
+			      // Position tooltip centered above the button
+			      const $btn = $(this);
+			      const offset = $btn.offset();
+			      const left = offset.left + $btn.outerWidth()/2 - $tooltip.outerWidth()/2;
+			      const top = offset.top - $tooltip.outerHeight() - 5;
+			      $tooltip.css({ left: left, top: top });
+			      $tooltip.fadeIn(200);
+			      $btn.data('tooltipElement', $tooltip);
+			    },
+			    function () {
+			      // Remove tooltip on mouse leave
+			      const $tooltip = $(this).data('tooltipElement');
+			      if ($tooltip) {
+			        $tooltip.fadeOut(200, function () {
+			          $(this).remove();
+			        });
+			      }
+			    }
+			  );
+			});
+
+		</script>
 </body>
 </html>

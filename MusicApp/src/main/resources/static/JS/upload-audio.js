@@ -58,6 +58,8 @@ $(document).ready(function () {
       });
     }
   }
+  
+  // render sheet music to main canvas
   function updateSheetMusic(abcString) {
     $('#loading').hide();
     $('#music-sheet').show();
@@ -74,6 +76,8 @@ $(document).ready(function () {
       alert('Transcription failed.');
     }
   }
+  
+  
   initSynthControls();
 
   // --- File Upload & Test Data (unchanged) ---
