@@ -334,10 +334,11 @@ color:#454545;
 					renderSheetMusicById('sheet-music-'+currentIdx,musicSheetList[i].sheet)
 				} 
 				
+				if(musicSheetList.length == 0){
+					$('#music-sheet-carousel').hide();
+				}
 				
 				$('.sm-sheet-card').on('click', function(){
-					console.log("support: ", ABCJS.synth.supportsAudio())
-					console.log("window: ", !window.synthControl)
 					initSynthControls()
 					renderSheetMusicById('music-sheet',$(this).data('musicsheet-data'))
 				})
