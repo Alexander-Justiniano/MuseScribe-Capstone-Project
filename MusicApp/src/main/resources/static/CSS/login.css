@@ -10,76 +10,28 @@ body{
     width: auto;
     font-size: 1.2rem;
 }
-
-.container{
-    display: flex;
-    justify-content: space-evenly;
-    padding-top: 150px;
-    margin: 0 auto;
-}
-
-.col-1{
-    width: 700px;
-    height: 550px;
-    margin: 10px;
-    background-color: #d9d9d9;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-bottom: 10px;
-}
-
 #login-logo img{
     width: 550px;
 
 }
-
+.form-element{
+	margin: 0.5rem 0.5rem;
+	display: flex;
+    flex-direction: column;
+}
 #slogan{
     margin-top: 40px;
     font-size: x-large;
 }
 
-.col-2{
-    width: 500px;
-    margin: 10px;
-    padding: 10px;
-    background-color: #d9d9d9;
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
-    
-}
-
 #form{
-    width: 350px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-
 }
 
-.form-element{
-    width: 350px;
-    display: flex;
-    justify-content: space-between; 
-    margin: 5px;
-}
 
-#form label{
-    margin-right: 15px;
-}
-
-#form input{
-    width: 200px;
-}
-
-#form button{
-    width: 80px;
-}
 
 #login-btn{
 	display: flex;
@@ -90,14 +42,13 @@ body{
 #submit-btn{
     display: inline-block;
     color: #FFFF;
-    background-color: #f2702f;
+    background-color: #dc2626;
     border-radius: 5px;
     border: none;
     font-size: 1.2rem;
-    height: 35px;
     width: 150px;
     padding: 5px;
-    margin: 20px;
+    margin-top: 20px;
     text-align: center;
     cursor: pointer;
     transition: all 0.5s;
@@ -132,17 +83,16 @@ body{
 }
 
 #third-party-login img{
-    width: 50px;
-    margin-top: -40px;
+    width: 35px;
 }
 
 #form-extras{
-    height: 60px;
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    margin-top: -50px;
+
 }
 
 .css-error{
