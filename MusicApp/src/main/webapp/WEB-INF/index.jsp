@@ -51,7 +51,7 @@
 	        		<div class="dropdown-content">
            				<a class="hover:bg-gray-300" href="#">Profile</a>
             			<a class="hover:bg-gray-300" href="#">Settings</a>
-            			<a class="hover:bg-gray-300" href="/login">Login</a>
+            			<a class="hover:bg-gray-300" href="/">Login</a>
         			</div>
 	        	</div>
 	        </div>

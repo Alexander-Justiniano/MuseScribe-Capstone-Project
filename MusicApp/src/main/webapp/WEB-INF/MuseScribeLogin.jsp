@@ -62,7 +62,7 @@
                 </div>
                 <div id="third-party-login">
                     <!-- *******************CLICKING ON THE IMAGE NEEDS TO MAKE AN API CALL TO THE GOOGLE AUTHENTICATION SERVICE******************* -->
-                <a href="/login">
+                <a href="http://localhost:8080/oauth2/authorization/google">
     				<img src="/IMGS/colorGoogleIcon.png" alt="Google Logo" width="300">
 				</a>
                 </div>

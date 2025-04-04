@@ -22,7 +22,7 @@ public class MainController {
 	
 	@RequestMapping("")
 	public String login() {
-		return "login.jsp";
+		return "MuseScribeLogin.jsp";
 	}
 	
 	
