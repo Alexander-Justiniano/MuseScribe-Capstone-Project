@@ -34,4 +34,5 @@ public class MongoConfig {
 
         return MongoClients.create(settings);
     }
+    
 }

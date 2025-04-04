@@ -1,0 +1,122 @@
+@charset "ISO-8859-1";
+
+*{
+    margin: 0;
+
+}
+
+body{
+    font-family: sans-serif;
+    width: auto;
+}
+
+.container{
+    display: flex;
+    justify-content: space-around;
+    margin: 0 auto;
+}
+
+label{
+    font-size: 1.2rem;
+}
+
+#goBack{
+	width: 400px;
+	display: flex;
+	align-items: center;
+	justify-content: start;
+	margin-top: 25px;
+}
+
+.goBack{
+	text-decoration: none;
+	font-size: 1.5rem;
+	color: black;
+}
+
+#col-1{
+    width: 420px;
+    background-color: #d9d9d9;
+    margin: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0px 30px 60px 30px;
+    border-radius: 10px;
+
+}
+
+#logo img{
+    width: 400px;
+    margin: 50px;
+}
+
+#form{
+	width: 420px;
+    background-color: #a5a4a0;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+}
+
+#elements-container{
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.form-element{
+    display: flex;
+    justify-content: space-between;
+    margin: 6px;
+}
+
+#form-extras{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    padding: 10px;
+}
+
+#form-extras img{
+    width: 50px;
+    margin: 20px 0px 10px 0px;
+}
+
+#form-extras button{
+    margin-top: 10px;
+}
+
+#submit-btn{
+    display: inline-block;
+    box-shadow: 0 5px #d9d9d9;
+    border-radius: 5px;
+    background-color: #b1222b;
+    font-size: 1.5rem;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    border: solid 2px black;
+    color: #1d1d1b;
+}
+
+#submit-btn:hover{
+    background-color: #dd0f1c;
+}
+
+#submit-btn:active{
+    background-color: #e13d48;
+    box-shadow: 0 3px #2f2f2f;
+    transform: translateY(8px);
+}
+
+.css-error{
+	font-size: 1.2rem;
+	color: #cc0000
+}
+

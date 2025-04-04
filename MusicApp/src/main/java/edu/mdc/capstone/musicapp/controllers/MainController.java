@@ -20,14 +20,16 @@ public class MainController {
 	
 //	*************************************************************** GET Requests ***************************************************************
 	
-	@GetMapping("/")
-	public String index() {
-		return "index.jsp";
-	}
-	
-	@GetMapping("/login")
+	@RequestMapping("")
 	public String login() {
 		return "login.jsp";
+	}
+	
+	
+	
+	@GetMapping("/dashboard")
+	public String index() {
+		return "index.jsp";
 	}
 	
 //	*************************************************************** POST Requests ***************************************************************

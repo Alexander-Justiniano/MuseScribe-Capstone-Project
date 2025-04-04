@@ -62,7 +62,7 @@
                 </div>
                 <div id="third-party-login">
                     <!-- *******************CLICKING ON THE IMAGE NEEDS TO MAKE AN API CALL TO THE GOOGLE AUTHENTICATION SERVICE******************* -->
-                <a href="#">
+                <a href="/login">
     				<img src="/IMGS/colorGoogleIcon.png" alt="Google Logo" width="300">
 				</a>
                 </div>
@@ -74,7 +74,7 @@
                     </div>
                     <!-- *******************NEEDS TO REDIRECT USER TO THE "REGISTRATION" PAGE******************* -->
                     <!-- Add route to registration page -->
-                    <p>Don't have an account already? <a href="#">Sign up now!</a></p>
+                    <p>Don't have an account already? <a href="/register">Sign up now!</a></p>
                 </div>
             </div>
     </div>
