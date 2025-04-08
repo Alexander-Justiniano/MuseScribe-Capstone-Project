@@ -87,7 +87,7 @@ color:#454545;
 
 </style>
 <body class="bg-gray-50 min-h-screen p-8">
-	<h2>Welcome, ${user.name} [${user.id}]</h2>
+
 
 	<div class="max-w-6xl mx-auto space-y-6">
 
@@ -98,7 +98,6 @@ color:#454545;
 				<!-- TODO: Add Dark Mode feature button -->
 				<div>
 					<button class="Dark Mode" data-name="Dark Mode">
-
 					</button>
 				</div>
 				<div class="dropdown">
@@ -119,9 +118,17 @@ color:#454545;
 		<div class="grid grid-cols-1  gap-6">
 			<!-- Sheet Music -->
 			<div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
-				<h2 class="text-xl font-semibold text-gray-900">Sheet Music</h2>
+				
+				<h2 class="text-xl font-semibold text-gray-900">
+					<c:if test="${user.id}">${user.name}</c:if> Sheet Music
+				</h2>
 
-				<div id="music-sheet" class="sheet-music-placeholder h-64 rounded-lg border border-gray-200 flex justify-center">
+				<div id="music-sheet" class="relative sheet-music-placeholder h-64 rounded-lg bg-red-50 border-2 border-red-400 flex justify-center">
+					
+					<div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2" style="transform: translate(-50%, -50%);">
+						<button class="recordButton bg-red-400 border-2 border-red-400 rounded p-3 px-4 text-white ">Record</button>  <button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600">Upload</button>
+					</div>
+					
 					<!-- Loading indicator shown while processing requests -->
 					<div id="loading" class="flex items-center" style="display:none;">
 						<p>Processing... Please wait.</p>
@@ -165,7 +172,7 @@ color:#454545;
 					      <i data-feather="save" class="w-5 h-5"></i>
 					    </button>
 					    <!-- Record -->
-					    <button id="recordButton" class="p-2 border rounded-lg hover:bg-red-200 relative" data-tooltip="Record">
+					    <button id="recordButton" class="p-2 recordButton border rounded-lg hover:bg-red-200 relative" data-tooltip="Record">
 					      <i data-feather="mic" class="w-5 h-5"></i>
 					    </button>
 					    <!-- Upload -->
@@ -302,6 +309,7 @@ color:#454545;
 				function renderSheetMusicById(element_id, abcString) {	
 
 				  if (abcString) {
+					
 				    // Render sheet music
 				    var visualObj = ABCJS.renderAbc(element_id, abcString, {
 				      responsive: 'resize',
@@ -341,6 +349,7 @@ color:#454545;
 				$('.sm-sheet-card').on('click', function(){
 					initSynthControls()
 					renderSheetMusicById('music-sheet',$(this).data('musicsheet-data'))
+					$("#music-sheet").removeClass("bg-red-50 border-red-400")
 				})
 				
 			})
