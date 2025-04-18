@@ -10,23 +10,23 @@ import java.util.Date;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+	@Autowired
+	private UserRepository userRepository;
 
-    public User createUser(User user) {
-        user.setCreatedAt(new Date());
-        return userRepository.save(user);
-    }
+	public User createUser(User user) {
+		user.setCreatedAt(new Date());
+		return userRepository.save(user);
+	}
 
-    public Optional<User> getUserById(String id) {
-        return userRepository.findById(id);
-    }
+	public Optional<User> getUserById(String id) {
+		return userRepository.findById(id);
+	}
 
-    public User updateUser(User user) {
-        return userRepository.save(user);
-    }
+	public User updateUser(User user) {
+		return userRepository.save(user);
+	}
 
-    public void deleteUser(String id) {
-        userRepository.deleteById(id);
-    }
+	public void deleteUser(String id) {
+		userRepository.deleteById(id);
+	}
 }
