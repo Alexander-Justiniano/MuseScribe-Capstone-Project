@@ -57,7 +57,14 @@ color:#454545;
 .abcjs-inline-audio .abcjs-midi-progress-background {
     background-color: #d54c4c;
 }
-
+.sheet-card{
+	display: inline-flex !important;
+	width: 130px !important;
+	height: 152px;
+	justify-content: center;
+	cursor:pointer;
+	position:relative;
+}
 .sm-sheet-card{
 	display: inline-flex !important;
 	padding: 0 !important;
@@ -104,11 +111,11 @@ color:#454545;
 					<button class="p-2 rounded-lg hover:bg-gray-300 dropdown-btn">
 						<i data-feather="settings" class="w-5 h-5"></i>
 					</button>
-				<div class="dropdown-content">
-				<a class="hover:bg-gray-300" href="#">Profile</a>
-				<a class="hover:bg-gray-300" href="#">Settings</a>
-				<a class="hover:bg-gray-300" href="/login">Login</a>
-				<button class="hover:bg-gray-300" style="display: block;padding: 10px;text-decoration: none;color: black;width: 100%;text-align: left;" id="fetchDataBtn" >Fetch Data</button>
+					<div class="dropdown-content">
+					<a class="hover:bg-gray-300" href="#">Profile</a>
+					<a class="hover:bg-gray-300" href="#">Settings</a>
+					<a class="hover:bg-gray-300" href="/login">Login</a>
+					<button class="hover:bg-gray-300" style="display: block;padding: 10px;text-decoration: none;color: black;width: 100%;text-align: left;" id="fetchDataBtn" >Fetch Data</button>
 				</div>
 				</div>
 			</div>
@@ -120,7 +127,7 @@ color:#454545;
 			<div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
 				
 				<h2 class="text-xl font-semibold text-gray-900">
-					<c:if test="${user.id}">${user.name}</c:if> Sheet Music
+					 Welcome ${user.name}! 
 				</h2>
 
 				<div id="music-sheet" class="relative sheet-music-placeholder h-64 rounded-lg bg-red-50 border-2 border-red-400 flex justify-center">
@@ -132,23 +139,38 @@ color:#454545;
 					<!-- Loading indicator shown while processing requests -->
 					<div id="loading" class="flex items-center" style="display:none;">
 						<p>Processing... Please wait.</p>
-						<img src="https://i.gifer.com/ZZ5H.gif" alt="Loading..." class="w-6 ml-2">
+						<img src="https://i.gifer.com/ZZ5H.gif" alt="Loading icon" class="w-6 ml-2">
 					</div>
 				</div>
 				
 				<!-- User Music Sheets -->
 				<div>
 				    
-				    <div id='music-sheet-carousel'>
-						<h3>Saved Sheet Music</h3>
-						<ul class="flex gap-4">
-							<c:forEach var="sheet" items="${musicSheets}" varStatus="status">
-							  
-								<li class='sm-sheet-card overflow-hidden rounded' id='sheet-music-${status.index + 1}' data-sheet-idx='${status.index}' data-musicsheet-data='${sheet.abcNotation}' data-musicsheet-title='${sheet.title}'>${sheet.title}</li>
-									
-							</c:forEach>
-						</ul>
+					
+					<div id="notebook-carousel" class="border rounded p-4">
+					  <h3 class="text-center text-lg">Your Notebooks</h3>
+					  <ul>
+					    <c:forEach var="nb" items="${notebooks}">
+					      <li 
+							class="notebook-sheet-card sheet-card uppercase rounded bg-gray-200 items-center font-bold flex-col"
+							data-notebook-id="${nb.id}"
+							data-notebook-title="${nb.title}">
+					        ${nb.title}
+							<span class="text-sm underline font-normal opacity-50">Open Book</span>
+					      </li>
+					    </c:forEach>
+					  </ul>
 					</div>
+
+					<div id="music-sheet-carousel" class="border rounded" style="display:none;">
+						<div class="bg-gray-200 flex p-1 text-center">
+							<button id='backToNotebooks' class="text-underline rounded bg-white mr-4 px-2 hover:bg-gray-100 transition-all duration-1500">Back</button>
+							<h3 id="current-notebook-title" class="text-center text-lg "></h3>
+						</div>
+						<div class="p-4">
+							<ul class="gap-4 grid grid-cols-7"></ul>
+						</div>
+					</div>	
 				</div>				
 				
 				
@@ -190,10 +212,6 @@ color:#454545;
 					  <!-- Waveform canvas -->
 					  <canvas id="waveform" style="display:none;height: 100px; border: 2pt solid #e94848; border-radius: 1rem; background: #fff0f0;"></canvas>
 					  
-					  <div class="flex gap-2">
-					    <p class="p-2 text-lg font-semibold whitespace-nowrap">Current Track:</p>
-					    <span class="p-2 text-lg inline-block w-13 truncate">Track Name Placeholder</span>
-					  </div>
 					
 				  </div>
 				</div>
@@ -323,34 +341,77 @@ color:#454545;
 				  } else {
 				    alert('Transcription failed.');
 				  }
-				}
+				}			
 				
-				let musicSheetList = [];
 				
-				$('#music-sheet-carousel').each(function(){
-					$(this).find('li').each(function(){
-						var current = $(this);
-						musicSheetList.push({
-							sheet_music_title:current.data('musicsheet-title'),
-							sheet:current.data('musicsheet-data')
-						})
-					})
-				})
 		
-				for (var i = 0; i < musicSheetList.length; i++) {
-					const currentIdx = i+1;
-					renderSheetMusicById('sheet-music-'+currentIdx,musicSheetList[i].sheet)
-				} 
-				
-				if(musicSheetList.length == 0){
-					$('#music-sheet-carousel').hide();
-				}
-				
-				$('.sm-sheet-card').on('click', function(){
+			  // 1. load sheets via AJAX
+				  $('#notebook-carousel').on('click', '.notebook-sheet-card', function(){
+				    const notebookId    = $(this).data('notebook-id');
+				    const notebookTitle = $(this).data('notebook-title');
+					
+					
+				    $('#notebook-carousel').hide();
+				    $('#music-sheet-carousel').show();
+				    $('#current-notebook-title').text(notebookTitle);
+				    $('#loading').show();
+				    $('#music-sheet-carousel ul').empty();
+					
+				    $.getJSON("/api/notebooks/"+notebookId+"/sheets")
+				     .done(sheets => {
+				       $('#loading').hide();
+				       if (!sheets.length) {
+				         $('#music-sheet-carousel ul')
+				           .append('<li>No sheets found.</li>');
+				         return;
+				       }
+				       sheets.forEach((sheet,idx) => {
+						const number = idx+1
+				         $('#music-sheet-carousel ul').append("<li id='sheet-music-"+number+"' class='sm-sheet-card rounded' data-musicsheet-data='"+sheet.abcNotation+"' data-musicsheet-title='"+sheet.title+"'>"+sheet.title+"</li>");
+				       });
+					   
+					   let musicSheetList = [];
+					   			
+   			 			$("#music-sheet-carousel").find('li').each(function(){
+   			 				var current = $(this);
+   			 				musicSheetList.push({
+   			 					sheet_music_title:current.data('musicsheet-title'),
+   			 					sheet:current.data('musicsheet-data')
+   			 				})
+   			 			})
+
+	   			 		for (var i = 0; i < musicSheetList.length; i++) {
+	   			 			const currentIdx = i+1;
+	   			 			renderSheetMusicById('sheet-music-'+currentIdx,musicSheetList[i].sheet)
+	   			 		} 
+					   
+				     })
+				     .fail(err => {
+				       $('#loading').hide();
+				       alert('Failed to load sheets');
+				     });
+
+					 
+				  });
+
+				  // 2. render ABC.js notation
+				 
+				$('#music-sheet-carousel').on('click', '.sm-sheet-card', function(){
+					$('#uploadShortcutWrapper').hide();
+				    const abc = $(this).data('musicsheet-data') || '';
+					
 					initSynthControls()
 					renderSheetMusicById('music-sheet',$(this).data('musicsheet-data'))
 					$("#music-sheet").removeClass("bg-red-50 border-red-400")
-				})
+				  });
+
+				  $('#backToNotebooks').on('click', function(){
+					$('#notebook-carousel').show();
+					$('#uploadShortcutWrapper').show();
+					$('#music-sheet-carousel').hide();
+				  })
+
+				
 				
 			})
 			
@@ -399,65 +460,64 @@ color:#454545;
 
 		<script >
 				//Here is javascript to interface MIDI API
-				
-				requestMIDIAccess()
-				requestMIDIAccess(MIDIOptions)
-				
-				navigator.permissions.query({ name: "midi", sysex: true }).then((result) => {
-				  if (result.state === "granted") {
-				    // Access granted.
-				  } else if (result.state === "prompt") {
-				    // Using API will prompt for permission
-				  }
-				  // Permission was denied by user prompt or permission policy
-				});
-				
-				let midi = null; // global MIDIAccess object
-				function onMIDISuccess(midiAccess) {
-				  console.log("MIDI ready!");
-				  midi = midiAccess; // store in the global (in real usage, would probably keep in an object instance)
-				}
+			/*				
+		requestMIDIAccess()
+		requestMIDIAccess(MIDIOptions)
+		
+		navigator.permissions.query({ name: "midi", sysex: true }).then((result) => {
+		  if (result.state === "granted") {
+		    // Access granted.
+		  } else if (result.state === "prompt") {
+		    // Using API will prompt for permission
+		  }
+		  // Permission was denied by user prompt or permission policy
+		});
+		
+		let midi = null; // global MIDIAccess object
+		function onMIDISuccess(midiAccess) {
+		  console.log("MIDI ready!");
+		  midi = midiAccess; // store in the global (in real usage, would probably keep in an object instance)
+		}
 
-				function onMIDIFailure(msg) {
-				  console.error(`Failed to get MIDI access - ${msg}`);
-				}
+		function onMIDIFailure(msg) {
+		  console.error(`Failed to get MIDI access - ${msg}`);
+		}
 
-				navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
-				
-				function listInputsAndOutputs(midiAccess) {
-				  for (const entry of midiAccess.inputs) {
-				    const input = entry[1];
-				    console.log(
-				      `Input port [type:'${input.type}']` +
-				        ` id:'${input.id}'` +
-				        ` manufacturer:'${input.manufacturer}'` +
-				        ` name:'${input.name}'` +
-				        ` version:'${input.version}'`,
-				    );
-				  }
-//new comment
-				  for (const entry of midiAccess.outputs) {
-				    const output = entry[1];
-				    console.log(
-				      `Output port [type:'${output.type}'] id:'${output.id}' manufacturer:'${output.manufacturer}' name:'${output.name}' version:'${output.version}'`,
-				    );
-				  }
-				}
-				
-				function onMIDIMessage(event) {
-				  let str = `MIDI message received at timestamp ${event.timeStamp}[${event.data.length} bytes]: `;
-				  for (const character of event.data) {
-				    str += `0x${character.toString(16)} `;
-				  }
-				  console.log(str);
-				}
+		navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+		
+		function listInputsAndOutputs(midiAccess) {
+		  for (const entry of midiAccess.inputs) {
+		    const input = entry[1];
+		    console.log(
+		      `Input port [type:'${input.type}']` +
+		        ` id:'${input.id}'` +
+		        ` manufacturer:'${input.manufacturer}'` +
+		        ` name:'${input.name}'` +
+		        ` version:'${input.version}'`,
+		    );
+		  }
+		  for (const entry of midiAccess.outputs) {
+		    const output = entry[1];
+		    console.log(
+		      `Output port [type:'${output.type}'] id:'${output.id}' manufacturer:'${output.manufacturer}' name:'${output.name}' version:'${output.version}'`,
+		    );
+		  }
+		}
+		
+		function onMIDIMessage(event) {
+		  let str = `MIDI message received at timestamp ${event.timeStamp}[${event.data.length} bytes]: `;
+		  for (const character of event.data) {
+		    str += `0x${character.toString(16)} `;
+		  }
+		  console.log(str);
+		}
 
-				function startLoggingMIDIInput(midiAccess) {
-				  midiAccess.inputs.forEach((entry) => {
-				    entry.onmidimessage = onMIDIMessage;
-				  });
-				}
-				
+		function startLoggingMIDIInput(midiAccess) {
+		  midiAccess.inputs.forEach((entry) => {
+		    entry.onmidimessage = onMIDIMessage;
+		  });
+		}
+				*/
 		</script>
 </body>
 </html>

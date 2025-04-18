@@ -8,7 +8,7 @@ import java.util.Date;
 public class MusicSheet {
 	@Id
 	private String id;
-	private String userId; // References User
+	private String notebookId;
 	private String title;
 	private String abcNotation;
 	private Date createdAt;
@@ -19,14 +19,6 @@ public class MusicSheet {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
 	}
 
 	public String getTitle() {
@@ -53,4 +45,11 @@ public class MusicSheet {
 		this.createdAt = createdAt;
 	}
 
+	public String getNotebookId() {
+		return notebookId;
+	}
+
+	public void setNotebookId(String notebookId) {
+		this.notebookId = notebookId;
+	}
 }

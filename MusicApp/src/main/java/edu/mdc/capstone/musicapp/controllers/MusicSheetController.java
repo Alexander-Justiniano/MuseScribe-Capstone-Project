@@ -11,23 +11,23 @@ import java.util.List;
 @RequestMapping("/api/music-sheets")
 public class MusicSheetController {
 
-    @Autowired
-    private MusicSheetService musicSheetService;
+	@Autowired
+	private MusicSheetService musicSheetService;
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<?> addSheet(@PathVariable String userId, @RequestBody MusicSheet sheet) {
-        return ResponseEntity.ok(musicSheetService.createMusicSheet(userId, sheet));
-    }
+	@PostMapping("/{userId}")
+	public ResponseEntity<?> addSheet(@PathVariable String userId, @RequestBody MusicSheet sheet) {
+		return ResponseEntity.ok(musicSheetService.createMusicSheet(userId, sheet));
+	}
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getSheetsByUser(@PathVariable String userId) {
-        List<MusicSheet> sheets = musicSheetService.getSheetsByUser(userId);
-        return ResponseEntity.ok(sheets);
-    }
+	@GetMapping("/{userId}")
+	public ResponseEntity<?> getSheetsByUser(@PathVariable String userId) {
+		List<MusicSheet> sheets = musicSheetService.getSheetsByNotebook(userId);
+		return ResponseEntity.ok(sheets);
+	}
 
-    @DeleteMapping("/{sheetId}")
-    public ResponseEntity<?> deleteSheet(@PathVariable String sheetId) {
-        musicSheetService.deleteMusicSheet(sheetId);
-        return ResponseEntity.ok("Deleted successfully");
-    }
+	@DeleteMapping("/{sheetId}")
+	public ResponseEntity<?> deleteSheet(@PathVariable String sheetId) {
+		musicSheetService.deleteMusicSheet(sheetId);
+		return ResponseEntity.ok("Deleted successfully");
+	}
 }

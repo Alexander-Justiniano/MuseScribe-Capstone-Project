@@ -6,9 +6,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import edu.mdc.capstone.musicapp.models.Notebook;
 import edu.mdc.capstone.musicapp.models.User;
 import edu.mdc.capstone.musicapp.service.UserService;
-import edu.mdc.capstone.musicapp.service.MusicSheetService;
+import edu.mdc.capstone.musicapp.service.NotebookService;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Controller
@@ -47,24 +53,25 @@ public class MainController {
 
 	@Autowired
 	private UserService userService;
-
+	
 	@Autowired
-	private MusicSheetService musicSheetService;
+    private NotebookService notebookService;
 
+    @GetMapping("/{userId}")
+    public String userHome(@PathVariable String userId, Model model) {
+        Optional<User> userOpt = userService.getUserById(userId);
+        if (userOpt.isEmpty()) {
+            model.addAttribute("error", "User not found");
+            return "index.jsp";
+        }
 
-	@GetMapping("/{userId}")
-	public String userHome(@PathVariable String userId, Model model) {
-		// Fetch user info
-		User user = userService.getUserById(userId).orElse(null);
+        User user = userOpt.get();
+        model.addAttribute("user", user);
 
-		if (user != null) {
-			model.addAttribute("user", user);
-			model.addAttribute("musicSheets", musicSheetService.getSheetsByUser(userId));
-		} else {
-			model.addAttribute("error", "User not found");
-		}
+        List<Notebook> notebooks = notebookService.getNotebooksByUser(userId);
+        model.addAttribute("notebooks", notebooks);
 
-		return "index.jsp";
-	}
+        return "index.jsp";
+    }
 
 }
