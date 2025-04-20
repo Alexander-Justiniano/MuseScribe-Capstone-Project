@@ -93,374 +93,508 @@ color:#454545;
 }
 
 </style>
-<body class="bg-gray-50 min-h-screen p-8">
 
-
-	<div class="max-w-6xl mx-auto space-y-6">
-
-		<!-- Header -->
-		<div class="flex justify-between items-center">
-			<img src="/IMGS/musescribe-logo.svg" alt="MuseScribe Logo" class="w-60">
-			<div>
-				<!-- TODO: Add Dark Mode feature button -->
-				<div>
-					<button class="Dark Mode" data-name="Dark Mode">
-					</button>
-				</div>
-				<div class="dropdown">
-					<button class="p-2 rounded-lg hover:bg-gray-300 dropdown-btn">
-						<i data-feather="settings" class="w-5 h-5"></i>
-					</button>
-					<div class="dropdown-content">
-					<a class="hover:bg-gray-300" href="#">Profile</a>
-					<a class="hover:bg-gray-300" href="#">Settings</a>
-					<a class="hover:bg-gray-300" href="/login">Login</a>
-					<button class="hover:bg-gray-300" style="display: block;padding: 10px;text-decoration: none;color: black;width: 100%;text-align: left;" id="fetchDataBtn" >Fetch Data</button>
-				</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Main Content -->
-		<div class="grid grid-cols-1  gap-6">
-			<!-- Sheet Music -->
-			<div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
-				
-				<h2 class="text-xl font-semibold text-gray-900">
-					 Welcome ${user.name}! 
-				</h2>
-
-				<div id="music-sheet" class="relative sheet-music-placeholder h-64 rounded-lg bg-red-50 border-2 border-red-400 flex justify-center">
-					
-					<div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2" style="transform: translate(-50%, -50%);">
-						<button class="recordButton bg-red-400 border-2 border-red-400 rounded p-3 px-4 text-white ">Record</button>  <button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600">Upload</button>
-					</div>
-					
-					<!-- Loading indicator shown while processing requests -->
-					<div id="loading" class="flex items-center" style="display:none;">
-						<p>Processing... Please wait.</p>
-						<img src="https://i.gifer.com/ZZ5H.gif" alt="Loading icon" class="w-6 ml-2">
-					</div>
-				</div>
-				
-				<!-- User Music Sheets -->
-				<div>
-				    
-					
-					<div id="notebook-carousel" class="border rounded p-4">
-					  <h3 class="text-center text-lg">Your Notebooks</h3>
-					  <ul>
-					    <c:forEach var="nb" items="${notebooks}">
-					      <li 
-							class="notebook-sheet-card sheet-card uppercase rounded bg-gray-200 items-center font-bold flex-col"
-							data-notebook-id="${nb.id}"
-							data-notebook-title="${nb.title}">
-					        ${nb.title}
-							<span class="text-sm underline font-normal opacity-50">Open Book</span>
-					      </li>
-					    </c:forEach>
-					  </ul>
-					</div>
-
-					<div id="music-sheet-carousel" class="border rounded" style="display:none;">
-						<div class="bg-gray-200 flex p-1 text-center">
-							<button id='backToNotebooks' class="text-underline rounded bg-white mr-4 px-2 hover:bg-gray-100 transition-all duration-1500">Back</button>
-							<h3 id="current-notebook-title" class="text-center text-lg "></h3>
-						</div>
-						<div class="p-4">
-							<ul class="gap-4 grid grid-cols-7"></ul>
-						</div>
-					</div>	
-				</div>				
-				
-				
-				<!-- ABC.js Audio Controls -->
-				<div class=" sticky bottom-0 rounded pb-4 "> 
-					<div class="bg-gray-50 shadow rounded px-3 pt-3 "> 
-					<div id="audio-controls"></div>
-					<!--Buttons-->
-					<div class="flex flex-col pt-3">
-					  <div class="button-wrapper">
-					    <!-- Edit -->
-					    <button class="p-2 border rounded-lg hover:bg-yellow-200" data-tooltip="Edit">
-					      <i data-feather="edit-2" class="w-5 h-5"></i>
-					    </button>
-					    <!-- Download -->
-					    <button id="midi-link" class="p-2 border rounded-lg hover:bg-purple-200" data-tooltip="Download">
-					      <i data-feather="download" class="w-5 h-5"></i>
-					    </button>
-					    <!-- Save -->
-					    <button id="music-save" class="p-2 border rounded-lg hover:bg-blue-200" data-tooltip="Save">
-					      <i data-feather="save" class="w-5 h-5"></i>
-					    </button>
-					    <!-- Record -->
-					    <button id="recordButton" class="p-2 recordButton border rounded-lg hover:bg-red-200 relative" data-tooltip="Record">
-					      <i data-feather="mic" class="w-5 h-5"></i>
-					    </button>
-					    <!-- Upload -->
-					    <button id="upload-audio" class="p-2 border upload-button rounded-lg hover:bg-green-200" data-tooltip="Upload Audio (.mp3 | .wav)">
-					      <i data-feather="upload" class="w-5 h-5"></i>
-					    </button>
-						  <!-- Recording Controls: Initially hidden -->
-						  <div id="recording-controls" class="inline-flex" style="display: none;" class="flex gap-2">
-						    <button id="stop-recording" class="p-2 rounded-lg border hover:bg-gray-200">Stop</button>
-						    <button id="reset-recording" class="p-2 rounded-lg border hover:bg-gray-200">Reset</button>
-						    <button id="submit-recording" class="p-2 rounded-lg border hover:bg-gray-200" style="display: none;">Submit</button>
-						  </div>
-					  </div>
-					
-					  <!-- Waveform canvas -->
-					  <canvas id="waveform" style="display:none;height: 100px; border: 2pt solid #e94848; border-radius: 1rem; background: #fff0f0;"></canvas>
-					  
-					
-				  </div>
-				</div>
-			</div>
-
-			<!-- Transcription Settings -->
-			<div class="bg-white rounded-lg shadow-sm px-6 pb-6 space-y-4" data-info="">
-				<h2 class="text-xl font-semibold text-gray-900">Transcription Settings</h2>
-				<div class="grid grid-cols-2 gap-4">
-					<div class="space-y-2">
-						<label class="text-sm font-medium text-gray-700">Instrument Type</label>
-						<select class="w-full rounded-md border border-gray-200 p-2">
-							<option>Piano</option>
-							<option>Guitar</option>
-							<option>Violin</option>
-						</select>
-					</div>
-					<div class="space-y-2">
-						<label class="text-sm font-medium text-gray-700">Time Signature</label>
-						<select class="w-full rounded-md border border-gray-200 p-2">
-							<option>4/4</option>
-							<option>3/4</option>
-							<option>6/8</option>
-						</select>
-					</div>
-				</div>
-			</div>
-
-			<!-- Analysis Details -->
-			<div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
-				<h2 class="text-xl font-semibold text-gray-900">Analysis Details</h2>
-				<div class="space-y-2">
-					<div class="flex justify-between">
-						<span class="text-sm text-gray-600">Detected Key:</span>
-						<span class="text-sm font-medium">C Major</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="text-sm text-gray-600">Tempo:</span>
-						<span class="text-sm font-medium">120 BPM</span>
-					</div>
-					<div class="flex justify-between">
-						<span class="text-sm text-gray-600">Placeholder:</span>
-						<span class="text-sm font-medium">Placeholder</span>
-					</div>
-				</div>
-			</div>
-
-
-
-			<!-- Modal for Drag-n-Drop Upload -->
-		<div id="uploadModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-			<div class="bg-white w-96 p-6 rounded-lg relative">
-				<!-- Close button -->
-				<button id="closeModal" class="absolute top-0 right-2 text-gray-600 hover:text-gray-800 text-2xl">&times;</button>
-				<!-- Upload Form with Drag-n-Drop Zone -->
-				<form id="uploadForm" class="upload-audio" action="" method="POST" enctype="multipart/form-data">
-	
-					<div class="flex items-center justify-center w-full">
-						<label id="modalDropZone" for="modal-dropzone-file"
-							class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-							<div id="modalDropZoneContent" class="flex flex-col items-center justify-center pt-5 pb-6">
-								<svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true"
-									xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-										d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-								</svg>
-								<p class="mb-2 text-sm text-gray-500">
-									<span class="font-semibold">Click to upload</span> or drag and drop
-								</p>
-								<p class="text-xs text-gray-500">Only .wav or .mp3 files accepted</p>
-							</div>
-							<!-- File input accepts only .wav and .mp3 -->
-							<input id="modal-dropzone-file" type="file" class="hidden" accept=".wav,.mp3" />
-						</label>
-					</div>
-					<!-- Hidden Upload Button Revealed on File Drop/Selection -->
-					<div id="modalUploadButtonContainer" class="flex items-center justify-center mt-4" style="display: none;">
-						<button type="submit" id="modalUploadButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-							Upload
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-
-	
-		<!-- Inline Scripts -->
-		<script src="/JS/modal-script.js"></script>
-		<script src="/JS/recorder.js"></script>
-		<script src="/JS/upload-audio.js"></script>
-		<script src="/css/script.js"></script>
-		
-		<script>
-			
-			
-			
-			$(document).ready(function () {
-				function initSynthControls() {
-
-				  if (ABCJS.synth.supportsAudio() && !window.synthControl) {
-				    window.synthControl = new ABCJS.synth.SynthController();
-				    window.synthControl.load('#audio-controls', null, {
-				      displayLoop: true,
-				      displayRestart: true,
-				      displayPlay: true,
-				      displayProgress: true,
-				      displayWarp: true,
-				    });
-				  }
-				}
-					
-				// render sheet music to specific element by id
-				function renderSheetMusicById(element_id, abcString) {	
-
-				  if (abcString) {
-					
-				    // Render sheet music
-				    var visualObj = ABCJS.renderAbc(element_id, abcString, {
-				      responsive: 'resize',
-				      dragging: false,
-				    })[0];
-
-				    // Reuse existing audio controls
-				    if (ABCJS.synth.supportsAudio() && window.synthControl) {
-				      window.synthControl.setTune(visualObj, false);
-				    }
-				  } else {
-				    alert('Transcription failed.');
-				  }
-				}			
-				
-				
-		
-			  // 1. load sheets via AJAX
-				  $('#notebook-carousel').on('click', '.notebook-sheet-card', function(){
-				    const notebookId    = $(this).data('notebook-id');
-				    const notebookTitle = $(this).data('notebook-title');
-					
-					
-				    $('#notebook-carousel').hide();
-				    $('#music-sheet-carousel').show();
-				    $('#current-notebook-title').text(notebookTitle);
-				    $('#loading').show();
-				    $('#music-sheet-carousel ul').empty();
-					
-				    $.getJSON("/api/notebooks/"+notebookId+"/sheets")
-				     .done(sheets => {
-				       $('#loading').hide();
-				       if (!sheets.length) {
-				         $('#music-sheet-carousel ul')
-				           .append('<li>No sheets found.</li>');
-				         return;
-				       }
-				       sheets.forEach((sheet,idx) => {
-						const number = idx+1
-				         $('#music-sheet-carousel ul').append("<li id='sheet-music-"+number+"' class='sm-sheet-card rounded' data-musicsheet-data='"+sheet.abcNotation+"' data-musicsheet-title='"+sheet.title+"'>"+sheet.title+"</li>");
-				       });
-					   
-					   let musicSheetList = [];
-					   			
-   			 			$("#music-sheet-carousel").find('li').each(function(){
-   			 				var current = $(this);
-   			 				musicSheetList.push({
-   			 					sheet_music_title:current.data('musicsheet-title'),
-   			 					sheet:current.data('musicsheet-data')
-   			 				})
-   			 			})
-
-	   			 		for (var i = 0; i < musicSheetList.length; i++) {
-	   			 			const currentIdx = i+1;
-	   			 			renderSheetMusicById('sheet-music-'+currentIdx,musicSheetList[i].sheet)
-	   			 		} 
-					   
-				     })
-				     .fail(err => {
-				       $('#loading').hide();
-				       alert('Failed to load sheets');
-				     });
-
-					 
-				  });
-
-				  // 2. render ABC.js notation
-				 
-				$('#music-sheet-carousel').on('click', '.sm-sheet-card', function(){
-					$('#uploadShortcutWrapper').hide();
-				    const abc = $(this).data('musicsheet-data') || '';
-					
-					initSynthControls()
-					renderSheetMusicById('music-sheet',$(this).data('musicsheet-data'))
-					$("#music-sheet").removeClass("bg-red-50 border-red-400")
-				  });
-
-				  $('#backToNotebooks').on('click', function(){
-					$('#notebook-carousel').show();
-					$('#uploadShortcutWrapper').show();
-					$('#music-sheet-carousel').hide();
-				  })
-
-				
-				
-			})
+  <body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto space-y-6">
+      <!-- Header -->
+      <div class="flex justify-between items-center">
+        <img src="/IMGS/musescribe-logo.svg" alt="MuseScribe Logo" class="w-60">
+        <div>
+          <!-- TODO: Add Dark Mode feature button -->
+          <div>
+            <button class="Dark Mode" data-name="Dark Mode">
+            </button>
+          </div>
+          <div class="dropdown">
+            <button class="p-2 rounded-lg hover:bg-gray-300 dropdown-btn">
+              <i data-feather="settings" class="w-5 h-5">
+              </i>
+            </button>
+            <div class="dropdown-content">
+              <a class="hover:bg-gray-300" href="#">
+                Profile
+              </a>
+              <a class="hover:bg-gray-300" href="#">
+                Settings
+              </a>
+              <a class="hover:bg-gray-300" href="/login">
+                Login
+              </a>
+              <button class="hover:bg-gray-300" style="display: block;padding: 10px;text-decoration: none;color: black;width: 100%;text-align: left;"
+              id="fetchDataBtn">
+                Fetch Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Main Content -->
+      <div class="grid grid-cols-1  gap-6">
+        <!-- Sheet Music -->
+        <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
+          <c:if test="${not empty user.name}">
+            <h2 class="text-xl font-semibold text-gray-900">
+              Welcome ${user.name}!
+            </h2>
+          </c:if>
+          <div id="music-sheet" class="relative sheet-music-placeholder h-64 rounded-lg bg-red-50 border-2 border-red-400 flex justify-center">
+            <div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2"
+            style="transform: translate(-50%, -50%);">
+              <button class="recordButton bg-red-400 border-2 border-red-400 rounded p-3 px-4 text-white ">
+                Record
+              </button>
+              <button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600">
+                Upload
+              </button>
+            </div>
+            <!-- Loading indicator shown while processing requests -->
+            <div id="loading" class="flex items-center" style="display:none;">
+              <p>
+                Processing... Please wait.
+              </p>
+              <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading icon" class="w-6 ml-2">
+            </div>
+          </div>
+          <!-- User Music Sheets -->
+          <div>
+            <c:if test="${notebooks.size() > 0}">
+              <div id="notebook-carousel" class="border rounded p-4">
+                <h3 class="text-center text-lg">
+                  Your Notebooks
+                </h3>
+                <ul>
+				<!--Render Notebooks-->
+                  <c:forEach var="nb" items="${notebooks}">
+                    <li class="notebook-sheet-card sheet-card uppercase rounded bg-gray-200 items-center font-bold flex-col"
+                    data-notebook-id="${nb.id}" data-notebook-title="${nb.title}">
+                      ${nb.title}
+                      <span class="text-sm underline font-normal opacity-50">
+                        Open Book
+                      </span>
+                    </li>
+                  </c:forEach>
+                </ul>
+              </div>
+            </c:if>
+            <div id="music-sheet-carousel" class="border rounded" style="display:none;">
+              <div class="bg-gray-200 flex p-1 text-center">
+                <button id='backToNotebooks' class="text-underline rounded bg-white mr-4 px-2 hover:bg-gray-100 transition-all duration-1500">
+                  Back
+                </button>
+                <h3 id="current-notebook-title" class="text-center text-lg "></h3>
+              </div>
+              <div class="p-4">
+				<!--Render Music Sheets-->
+                <ul class="gap-4 grid grid-cols-7"></ul>
+              </div>
+            </div>
+          </div>
+          <!-- ABC.js Audio Controls -->
+          <div class=" sticky bottom-0 rounded pb-4 ">
+            <div class="bg-gray-50 shadow rounded px-3 pt-3 ">
+              <div id="audio-controls"></div>
+              <!--Buttons-->
+              <div class="flex flex-col py-3">
+                <div class="button-wrapper">
+                  <!-- Edit -->
+                  <button class="p-2 border rounded-lg hover:bg-yellow-200" data-tooltip="Edit">
+                    <i data-feather="edit-2" class="w-5 h-5"></i>
+                  </button>
+                  <!-- Download -->
+                  <button id="midi-link" class="p-2 border rounded-lg hover:bg-purple-200"
+                  data-tooltip="Download">
+                    <i data-feather="download" class="w-5 h-5"></i>
+                  </button>
+                  <!-- Save -->
+                  <button id="music-save" class="p-2 border rounded-lg hover:bg-blue-200"
+                  data-tooltip="Save">
+                    <i data-feather="save" class="w-5 h-5"></i>
+                  </button>
+                  <!-- Record -->
+                  <button id="recordButton" class="p-2 recordButton border rounded-lg hover:bg-red-200 relative"
+                  data-tooltip="Record">
+                    <i data-feather="mic" class="w-5 h-5"></i>
+                  </button>
+                  <!-- Upload -->
+                  <button id="upload-audio" class="p-2 border upload-button rounded-lg hover:bg-green-200"
+                  data-tooltip="Upload Audio (.mp3 | .wav)">
+                    <i data-feather="upload" class="w-5 h-5"></i>
+                  </button>
+                  <!-- Recording Controls: Initially hidden -->
+                  <div id="recording-controls" class="inline-flex" style="display: none;">
+                    <button id="stop-recording" class="p-2 rounded-lg border hover:bg-gray-200">
+                      Stop
+                    </button>
+                    <button id="reset-recording" class="p-2 rounded-lg border hover:bg-gray-200">
+                      Reset
+                    </button>
+                    <button id="submit-recording" class="p-2 rounded-lg border hover:bg-gray-200"
+                    style="display: none;">
+                      Submit
+                    </button>
+                  </div>
+                </div>
+                <!-- Waveform canvas -->
+                <canvas id="waveform" style="display:none;height: 100px; border: 2pt solid #e94848; border-radius: 1rem; background: #fff0f0;">
+                </canvas>
+              </div>
+            </div>
+          </div>
+		  <!-- Header Editor Section -->
+		   <div class="bg-white p-4 rounded shadow">
+		     <h2 class="text-xl font-bold mb-4">Settings</h2>
+		     <div class="grid grid-cols-2 gap-4">
+		       <label>Title: <input class="border p-1 w-full rounded" id="abc-title" placeholder="Music Sheet Title"></label>
+		       <label>Composer: <input class="border p-1 w-full rounded" id="abc-composer" placeholder="Music Sheet Writers Name"></label>
+		       <label>Meter:
+		         <select class="border p-1 w-full rounded" id="abc-meter">
+					<option disabled selected>Choose an option</option>
+					<option value="2/4">2/4</option>
+				   <option value="3/4">3/4</option>
+				   <option value="4/4">4/4</option>
+				   <option value="6/8">6/8</option>
+				   <option value="9/8">9/8</option>
+				   <option value="12/8">12/8</option>
+		         </select>
+		       </label>
+		       <label>Note Length:
+		         <select class="border p-1 w-full rounded" id="abc-length">
+					<option disabled selected>Choose an option</option>
+		           <option>1/1</option>
+				   <option>1/2</option>
+				   <option>1/4</option>
+				   <option>1/8</option>
+				   <option>1/16</option>
+		         </select>
+		       </label>
+		       <label>Tempo:
+		         <input type="number" class="border p-1 w-full rounded" id="abc-tempo" min="30" max="300" step="1" value="150" placeholder="e.g. 150">
+		       </label>
+		       <label>Key:
+		         <select class="border p-1 w-full rounded" id="abc-key">
+					<option disabled selected>Choose an option</option>
+		           <option>C</option>
+				   <option>G</option>
+				   <option>D</option>
+				   <option>A</option>
+				   <option>E</option>
+				   <option>B</option>
+				   <option>F#</option>
+				   <option>C#</option>
+		           <option>F</option>
+				   <option>Bb</option>
+				   <option>Eb</option>
+				   <option>Ab</option>
+				   <option>Db</option>
+				   <option>Gb</option>
+				   <option>Cb</option>
+		         </select>
+		       </label>
+		     </div>
+		     <button id="updateAbcHeader" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update</button>
+		   </div>
+          <!-- Modal for Drag-n-Drop Upload -->
+          <div id="uploadModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+            <div class="bg-white w-96 p-6 rounded-lg relative">
+              <!-- Close button -->
+              <button id="closeModal" class="absolute top-0 right-2 text-gray-600 hover:text-gray-800 text-2xl">
+                &times;
+              </button>
+              <!-- Upload Form with Drag-n-Drop Zone -->
+              <form id="uploadForm" class="upload-audio" action="" method="POST" enctype="multipart/form-data">
+                <div class="flex items-center justify-center w-full">
+                  <label id="modalDropZone" for="modal-dropzone-file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                    <div id="modalDropZoneContent" class="flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                      fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                        stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                        />
+                      </svg>
+                      <p class="mb-2 text-sm text-gray-500">
+                        <span class="font-semibold">
+                          Click to upload
+                        </span>
+                        or drag and drop
+                      </p>
+                      <p class="text-xs text-gray-500">
+                        Only .wav or .mp3 files accepted
+                      </p>
+                    </div>
+                    <!-- File input accepts only .wav and .mp3 -->
+                    <input id="modal-dropzone-file" type="file" class="hidden" accept=".wav,.mp3"
+                    />
+                  </label>
+                </div>
+                <!-- Hidden Upload Button Revealed on File Drop/Selection -->
+                <div id="modalUploadButtonContainer" class="flex items-center justify-center mt-4"
+                style="display: none;">
+                  <button type="submit" id="modalUploadButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Upload
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Inline Scripts -->
+    <script src="/JS/modal-script.js"> </script>
+    <script src="/JS/recorder.js"></script>
+    <script src="/JS/upload-audio.js"></script>
+    <script src="/css/script.js"></script>
+    <script>
+      
+      /*		  
+			function renderAbc(abc) {
+			  ABCJS.renderAbc("abcRenderer", abc);
+			}
 			
 			$(document).ready(function () {
-			  $('.button-wrapper button').hover(
-			    function () {
-			      // Get tooltip text from data attribute
-			      const tooltipText = $(this).data('tooltip');
-			      if (!tooltipText) return;
-			      // Create tooltip element
-			      const $tooltip = $('<div class="custom-tooltip"></div>')
-			        .text(tooltipText)
-			        .css({
-			          position: 'absolute',
-			          background: 'rgba(0, 0, 0, 0.7)',
-			          color: '#fff',
-			          padding: '4px 8px',
-			          'border-radius': '3px',
-			          'font-size': '12px',
-			          'z-index': 1000,
-			          display: 'none'
-			        });
-			      $('body').append($tooltip);
-			      // Position tooltip centered above the button
-			      const $btn = $(this);
-			      const offset = $btn.offset();
-			      const left = offset.left + $btn.outerWidth()/2 - $tooltip.outerWidth()/2;
-			      const top = offset.top - $tooltip.outerHeight() - 5;
-			      $tooltip.css({ left: left, top: top });
-			      $tooltip.fadeIn(200);
-			      $btn.data('tooltipElement', $tooltip);
-			    },
-			    function () {
-			      // Remove tooltip on mouse leave
-			      const $tooltip = $(this).data('tooltipElement');
-			      if ($tooltip) {
-			        $tooltip.fadeOut(200, function () {
-			          $(this).remove();
-			        });
-			      }
-			    }
-			  );
+			  const initialAbc = $('#abcRaw').text().trim();
+			  const noteSection = extractNoteSection(initialAbc);
+			  populateInputsFromAbc(initialAbc);
+			  renderAbc(initialAbc);
+			
+			  $('#updateAbcHeader').click(function () {
+			    const updatedAbc = buildAbcFromInputs(noteSection);
+			    $('#abcRaw').text(updatedAbc);
+			    renderAbc(updatedAbc);
+			  });
 			});
+					  
+			  */
+      
+    </script>
+    <script>
+      $(document).ready(function() {
+		
+		function extractNoteSection(abc) {
+	        const lines = abc.split('\n');
+	        const noteLines = [];
+	        let inNotes = false;
+	        for (let line of lines) {
+	          if (!inNotes && /^[A-Ga-gzZ|:\s]/.test(line)) {
+	            inNotes = true;
+	          }
+	          if (inNotes) noteLines.push(line);
+	        }
+	        return noteLines.join('\n');
+	      }
 
-		</script>
+	      function extractHeaderValue(abc, targetKey) {
+			let foundValue = null;
+			abc.split(/\r?\n/).forEach(line => {
+			  const match = line.match(/^\s*([A-Za-z][A-Za-z0-9]*)\:(.*?)\s*$/);
+			  if (match) {
+			    const key = match[1];
+			    const value = match[2];
+				if(targetKey == key){		
+					foundValue = value;
+				}
+			  }
+			});
+			
+			return foundValue;
+	      }
 
-		<script >
-				//Here is javascript to interface MIDI API
-			/*				
+		  function populateInputsFromAbc(abc) {
+
+		    $('#abc-title').val(extractHeaderValue(abc, 'T'));
+		    $('#abc-composer').val(extractHeaderValue(abc, 'C'));
+		    $('#abc-transcriber').val(extractHeaderValue(abc, 'Z'));
+
+		    const meterVal = extractHeaderValue(abc, 'M');
+		    if ($("#abc-meter option[value='"+meterVal+"']").length) {
+		      $('#abc-meter').val(meterVal);
+		    } 
+
+		    const lengthVal = extractHeaderValue(abc, 'L');
+			
+		    if ($("#abc-length option[value='"+lengthVal+"']").length) {
+		      $('#abc-length').val(lengthVal);
+		    } else {
+		      $('#abc-length').val("1/8");
+		    }
+
+		    const tempoVal = extractHeaderValue(abc, 'Q');
+		    if (tempoVal) {
+		      $('#abc-tempo').val(tempoVal);
+		    }
+
+		    const keyVal = extractHeaderValue(abc, 'K');
+		    if ($("#abc-key option[value='"+keyVal+"']").length) {
+		      $('#abc-key').val(keyVal);
+		    } 
+		  }
+
+		  
+		  function buildAbcFromInputs(noteSection) {
+
+			const headers = [
+			  "T:" + $("#abc-title").val(),
+			  $("#abc-composer").val() ? "C:" + $("#abc-composer").val() : "",
+			  $("#abc-transcriber").val() ? "Z:" + $("#abc-transcriber").val() : "",
+			  $("#abc-meter").val() ? "M:" + $("#abc-meter").val() : "4/4",
+			  $("#abc-length").val() && "L:" + $("#abc-length").val(),
+			  $("#abc-tempo").val() ? "Q:" + $("#abc-tempo").val() : "150",
+			  $("#abc-key").val() && "K:" + $("#abc-key").val()
+			].filter(Boolean);
+
+		    return [...headers, noteSection].join('\n');
+		  }
+		
+        function initSynthControls() {
+
+          if (ABCJS.synth.supportsAudio() && !window.synthControl) {
+            window.synthControl = new ABCJS.synth.SynthController();
+            window.synthControl.load('#audio-controls', null, {
+              displayLoop: true,
+              displayRestart: true,
+              displayPlay: true,
+              displayProgress: true,
+              displayWarp: true,
+            });
+          }
+        }
+
+        // render sheet music to specific element by id
+        function renderSheetMusicById(element_id, abcString) {
+          if (abcString) {
+			initSynthControls(); 
+
+            // Render sheet music
+            var visualObj = ABCJS.renderAbc(element_id, abcString, {
+              responsive: 'resize',
+              dragging: false,
+            })[0];
+
+            // Reuse existing audio controls
+            if (ABCJS.synth.supportsAudio() && window.synthControl) {
+              window.synthControl.setTune(visualObj, false);
+            }
+          } else {
+            alert('Transcription failed.');
+          }
+        }
+
+        // 1. load sheets via AJAX
+        $('#notebook-carousel').on('click', '.notebook-sheet-card',function() {
+          const notebookId = $(this).data('notebook-id');
+          const notebookTitle = $(this).data('notebook-title');
+
+          $('#notebook-carousel').hide();
+          $('#music-sheet-carousel').show();
+          $('#current-notebook-title').text(notebookTitle);
+          $('#loading').show();
+          $('#music-sheet-carousel ul').empty();
+
+          $.getJSON("/api/notebooks/" + notebookId + "/sheets").done(sheets => {
+            $('#loading').hide();
+            if (!sheets.length) {
+              $('#music-sheet-carousel ul').append('<li>No sheets found.</li>');
+              return;
+            }
+            sheets.forEach((sheet, idx) => {
+              const number = idx + 1;
+			  $('#music-sheet-carousel ul').append("<li id='sheet-music-" + number + "' class='sm-sheet-card rounded' data-musicsheet-data='" + sheet.abcNotation + "' data-musicsheet-title='" + sheet.title + "'>" + sheet.title + "</li>");
+            });
+
+            let musicSheetList = [];
+
+            $("#music-sheet-carousel").find('li').each(function() {
+              var current = $(this);
+              musicSheetList.push({
+                sheet_music_title: current.data('musicsheet-title'),
+                sheet: current.data('musicsheet-data')
+              })
+            })
+
+            for (var i = 0; i < musicSheetList.length; i++) {
+              const currentIdx = i + 1;
+              renderSheetMusicById('sheet-music-' + currentIdx, musicSheetList[i].sheet)
+            }
+
+          }).fail(err => {
+            $('#loading').hide();
+            alert('Failed to load sheets');
+          });
+
+        });
+
+		let extractedNoted = null;
+		
+        // 2. render ABC.js notation
+        $('#music-sheet-carousel').on('click', '.sm-sheet-card', function() {
+          $('#uploadShortcutWrapper').hide();
+          const abc = $(this).data('musicsheet-data') || '';
+		  extractedNoted = extractNoteSection(abc)
+		  console.log(abc)
+		  populateInputsFromAbc(abc);
+		  renderSheetMusicById('music-sheet', $(this).data('musicsheet-data')); 
+		  $("#music-sheet").removeClass("bg-red-50 border-red-400");
+        });
+
+		// update sheet music with new settings when update button is clicked
+		$('#updateAbcHeader').click(function () {
+		  const updatedAbc = buildAbcFromInputs(extractedNoted);
+		  console.log("updatedMusicSheet : ",updatedAbc)
+		  renderSheetMusicById('music-sheet', updatedAbc); 
+		});
+		
+		// Logic to hide sheet music and display notebooks when back button is clicked
+        $('#backToNotebooks').on('click', function() {
+          $('#notebook-carousel').show();
+          $('#uploadShortcutWrapper').show();
+          $('#music-sheet-carousel').hide();
+        })
+
+		// music action buttons tooltip (edit, download, save, record, upload)
+        $('.button-wrapper button').hover(function() {
+          // Get tooltip text from data attribute
+          const tooltipText = $(this).data('tooltip');
+          if (!tooltipText) return;
+          // Create tooltip element
+          const $tooltip = $('<div class="custom-tooltip"></div>').text(tooltipText).css({
+            position: 'absolute',
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: '#fff',
+            padding: '4px 8px',
+            'border-radius': '3px',
+            'font-size': '12px',
+            'z-index': 1000,
+            display: 'none'
+          });
+		  
+          $('body').append($tooltip);
+          // Position tooltip centered above the button
+          const $btn = $(this);
+          const offset = $btn.offset();
+          const left = offset.left + $btn.outerWidth() / 2 - $tooltip.outerWidth() / 2;
+          const top = offset.top - $tooltip.outerHeight() - 5;
+          $tooltip.css({
+            left: left,
+            top: top
+          });
+          $tooltip.fadeIn(200);
+          $btn.data('tooltipElement', $tooltip);
+        },
+        function() {
+          // Remove tooltip on mouse leave
+          const $tooltip = $(this).data('tooltipElement');
+          if ($tooltip) {
+            $tooltip.fadeOut(200,
+            function() {
+              $(this).remove();
+            });
+          }
+        });
+      });
+    </script>
+    <script>
+      //Here is javascript to interface MIDI API
+      /*				
 		requestMIDIAccess()
 		requestMIDIAccess(MIDIOptions)
 		
@@ -518,6 +652,7 @@ color:#454545;
 		  });
 		}
 				*/
-		</script>
-</body>
+      
+    </script>
+  </body>
 </html>

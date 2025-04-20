@@ -221,88 +221,69 @@ $(document).ready(function () {
     reader.readAsArrayBuffer(blob);
   }
   // Start recording: create a new AudioContext, recorder, and analyser.
-async function startRecording() {
-	return navigator.mediaDevices.getUserMedia({ audio: true })
-	.then(function (stream) {
-	        audioStream = stream;
-	        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-	        const source = audioContext.createMediaStreamSource(stream);
-	        setupAnalyser(source);
-	        recorder = new Recorder(source, { numChannels: 1 });
-	        recorder.record();
-		})
-		.then(function(){
+  async function startRecording() {
+  	try {
+  		const devices = await navigator.mediaDevices.enumerateDevices();
+  		const audioInput = devices.some(device => device.kind === 'audioinput');
 
-			requestMIDIAccess()
-			requestMIDIAccess(MIDIOptions)
-						
-			navigator.permissions.query({ name: "midi", sysex: true }).then((result) => {
-			  if (result.state === "granted") {
-			    // Access granted.
-			  } else if (result.state === "prompt") {
-			    // Using API will prompt for permission
-			  }
-			  // Permission was denied by user prompt or permission policy
-			});
-	
-			let midi = null; // global MIDIAccess object
-			function onMIDISuccess(midiAccess) {
-			  console.log("MIDI ready!");
-			  midi = midiAccess; // store in the global (in real usage, would probably keep in an object instance)
-			}
-			
-			function onMIDIFailure(msg) {
-			  console.error(`Failed to get MIDI access - ${msg}`);
-			}
-			
-			navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
-							
-			function listInputsAndOutputs(midiAccess) {
-				  for (const entry of midiAccess.inputs) {
-				    const input = entry[1];
-				    console.log(
-				      `Input port [type:'${input.type}']` +
-				        ` id:'${input.id}'` +
-				        ` manufacturer:'${input.manufacturer}'` +
-				        ` name:'${input.name}'` +
-				        ` version:'${input.version}'`,
-				    );
-				  }
-				//new comment
-				  for (const entry of midiAccess.outputs) {
-				    const output = entry[1];
-				    console.log(
-				      `Output port [type:'${output.type}'] id:'${output.id}' manufacturer:'${output.manufacturer}' name:'${output.name}' version:'${output.version}'`,
-				    );
-				  }
-			}
-							
-			function onMIDIMessage(event) {
-			  let str = `MIDI message received at timestamp ${event.timeStamp}[${event.data.length} bytes]: `;
-			  for (const character of event.data) {
-			    str += `0x${character.toString(16)} `;
-			  }
-			  console.log(str);
-			}
-			
-			function startLoggingMIDIInput(midiAccess) {
-			  midiAccess.inputs.forEach((entry) => {
-			    entry.onmidimessage = onMIDIMessage;
-			  });
-			}
-	  })
-	  .catch(function (err) {
-		console.error('Error accessing audio devices: ' + err);
-		$("#recordButton").removeClass('bg-red-100');
-		$waveformCanvas.hide();
-		$('#recording-controls').hide();
-		$('#stop-recording').hide();
-		isRecording = false;
-		if (err.name === 'NotFoundError') alert('No audio input device found.');
-		else if (err.name === 'NotAllowedError') alert('Microphone permission denied.');
-		else alert('Error: ' + err.message);
-	  });
+  		const midiAccess = await navigator.requestMIDIAccess({ sysex: true }).catch(() => null);
+  		const hasMIDIDevice = midiAccess && midiAccess.inputs.size > 0;
+
+  		if (!audioInput && !hasMIDIDevice) {
+  			alert("No audio or MIDI input devices found.");
+  			return;
+  		}
+
+  		let userChoice = null;
+
+  		if (audioInput && hasMIDIDevice) {
+  			userChoice = prompt("Both audio and MIDI devices are available. Type 'audio' or 'midi' to choose:");
+  			if (userChoice !== 'audio' && userChoice !== 'midi') {
+  				alert("Invalid input. Please restart and choose either 'audio' or 'midi'.");
+  				return;
+  			}
+  		} else {
+  			userChoice = audioInput ? 'audio' : 'midi';
+  		}
+
+  		if (userChoice === 'audio') {
+  			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  			audioStream = stream;
+  			audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  			const source = audioContext.createMediaStreamSource(stream);
+  			setupAnalyser(source);
+  			recorder = new Recorder(source, { numChannels: 1 });
+  			recorder.record();
+  			console.log("Recording started from microphone.");
+  		}
+
+  		if (userChoice === 'midi') {
+  			console.log("Initializing MIDI...");
+
+  			function onMIDIMessage(event) {
+  				let str = `MIDI message received at timestamp ${event.timeStamp}[${event.data.length} bytes]: `;
+  				for (const character of event.data) {
+  					str += `0x${character.toString(16)} `;
+  				}
+  				console.log(str);
+  			}
+
+  			function startLoggingMIDIInput(midiAccess) {
+  				midiAccess.inputs.forEach((input) => {
+  					input.onmidimessage = onMIDIMessage;
+  				});
+  			}
+
+  			startLoggingMIDIInput(midiAccess);
+  			console.log("MIDI input logging started.");
+  		}
+
+  	} catch (err) {
+  		console.error('Initialization error:', err);
+  		alert(`Error: ${err.message}`);
+  	}
   }
+
   
   function pauseRecording() {
     if (recorder && !isPaused) {
