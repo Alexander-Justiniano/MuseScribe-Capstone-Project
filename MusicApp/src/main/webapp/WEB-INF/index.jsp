@@ -381,7 +381,7 @@ color:#454545;
     <script src="/JS/modal-script.js"> </script>
     <script src="/JS/recorder.js"></script>
     <script src="/JS/upload-audio.js"></script>
-    <script src="/css/script.js"></script>
+    <script src="/CSS/script.js"></script>
 
     <script>
       $(document).ready(function() {
