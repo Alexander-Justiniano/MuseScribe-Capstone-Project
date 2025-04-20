@@ -5,5 +5,5 @@ import edu.mdc.capstone.musicapp.models.MusicSheet;
 import java.util.List;
 
 public interface MusicSheetRepository extends MongoRepository<MusicSheet, String> {
-    List<MusicSheet> findByUserId(String userId);
+	List<MusicSheet> findByNotebookId(String notebookId);
 }
