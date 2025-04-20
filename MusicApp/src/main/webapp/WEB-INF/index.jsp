@@ -40,6 +40,8 @@
 	<link rel="apple-touch-icon" sizes="180x180" href="/IMGS/favicon_io/apple-touch-icon.png" />
 	<meta name="apple-mobile-web-app-title" content="MuseScribe" />
 	<link rel="manifest" href="/IMGS/favicon_io/site.webmanifest" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </head>
 <style>
 /* Custom style for dragover state */
@@ -90,16 +92,46 @@ color:#454545;
   background: transparent;
   z-index: 10; /* Ensure it's above the canvas */
 }
+.abcjs-inline-audio {
+    height: 35px;
+}
+.abcjs-btn {
+
+    border-radius: .35rem;
+}
+.abcjs-btn {
+
+
+    height: auto !important;
+    padding: 4px 4px !important;
+}
+.abcjs-btn.abcjs-pushed{
+	background-color: #898989 !important;	
+}
+@media (max-width: 640px) {
+  .sm-sheet-card {
+    width: 100px !important;
+    height: 120px !important;
+  }
+  .abcjs-inline-audio {
+	flex-wrap: wrap;
+	height:auto;
+	padding:8px;
+  }
+  span.abcjs-tempo-wrapper {
+      width: 100%;
+  }
+}
 
 </style>
-<body class="bg-gray-50 min-h-screen p-8">
+<body class="bg-gray-50 min-h-screen md:p-8">
 
 
 	<div class="max-w-6xl mx-auto space-y-6">
 
 		<!-- Header -->
 		<div class="flex justify-between items-center">
-			<img src="/IMGS/musescribe-logo.svg" alt="MuseScribe Logo" class="w-60">
+			<img src="/IMGS/musescribe-logo.svg" alt="MuseScribe Logo" class="w-40 sm:w-60">
 			<div>
 				<!-- TODO: Add Dark Mode feature button -->
 				<div>
@@ -131,7 +163,7 @@ color:#454545;
 
 				<div id="music-sheet" class="relative sheet-music-placeholder h-64 rounded-lg bg-red-50 border-2 border-red-400 flex justify-center">
 					
-					<div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2" style="transform: translate(-50%, -50%);">
+					<div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2 flex gap-5" style="transform: translate(-50%, -50%);">
 						<button class="recordButton bg-red-400 border-2 border-red-400 rounded p-3 px-4 text-white ">Record</button>  <button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600">Upload</button>
 					</div>
 					
