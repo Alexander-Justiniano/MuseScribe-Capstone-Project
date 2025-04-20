@@ -28,7 +28,7 @@
 	<meta charset="UTF-8">
 	<title>Musescribe Homepage</title>
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-	<link href="/css/style.css" rel="stylesheet">
+	<link href="/CSS/style.css" rel="stylesheet">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js"></script>
 	<link href="https://www.abcjs.net/abcjs-audio.css" media="all" rel="stylesheet" type="text/css">
 	<script src="https://www.abcjs.net/abcjs-basic-min.js"></script>
@@ -284,7 +284,7 @@ color:#454545;
 		<script src="/JS/modal-script.js"></script>
 		<script src="/JS/recorder.js"></script>
 		<script src="/JS/upload-audio.js"></script>
-		<script src="/css/script.js"></script>
+		<script src="/CSS/script.js"></script>
 		
 		<script>
 			
