@@ -34,6 +34,12 @@
 	<script src="https://www.abcjs.net/abcjs-basic-min.js"></script>
 	<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 	
+	<link rel="icon" type="image/png" href="/IMGS/favicon_io/favicon-96x96.png" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="/IMGS/favicon_io/favicon.svg" />
+	<link rel="shortcut icon" href="/IMGS/favicon_io/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/IMGS/favicon_io/apple-touch-icon.png" />
+	<meta name="apple-mobile-web-app-title" content="MuseScribe" />
+	<link rel="manifest" href="/IMGS/favicon_io/site.webmanifest" />
 </head>
 <style>
 /* Custom style for dragover state */
