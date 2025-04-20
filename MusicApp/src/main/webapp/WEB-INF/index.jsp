@@ -28,12 +28,20 @@
 	<meta charset="UTF-8">
 	<title>Musescribe Homepage</title>
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-	<link href="/css/style.css" rel="stylesheet">
+	<link href="/CSS/style.css" rel="stylesheet">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.28.0/feather.min.js"></script>
 	<link href="https://www.abcjs.net/abcjs-audio.css" media="all" rel="stylesheet" type="text/css">
 	<script src="https://www.abcjs.net/abcjs-basic-min.js"></script>
 	<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 	
+	<link rel="icon" type="image/png" href="/IMGS/favicon_io/favicon-96x96.png" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="/IMGS/favicon_io/favicon.svg" />
+	<link rel="shortcut icon" href="/IMGS/favicon_io/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/IMGS/favicon_io/apple-touch-icon.png" />
+	<meta name="apple-mobile-web-app-title" content="MuseScribe" />
+	<link rel="manifest" href="/IMGS/favicon_io/site.webmanifest" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </head>
 <style>
 /* Custom style for dragover state */
@@ -90,6 +98,36 @@ color:#454545;
   height: 100%;
   background: transparent;
   z-index: 10; /* Ensure it's above the canvas */
+}
+.abcjs-inline-audio {
+    height: 35px;
+}
+.abcjs-btn {
+
+    border-radius: .35rem;
+}
+.abcjs-btn {
+
+
+    height: auto !important;
+    padding: 4px 4px !important;
+}
+.abcjs-btn.abcjs-pushed{
+	background-color: #898989 !important;	
+}
+@media (max-width: 640px) {
+  .sm-sheet-card {
+    width: 100px !important;
+    height: 120px !important;
+  }
+  .abcjs-inline-audio {
+	flex-wrap: wrap;
+	height:auto;
+	padding:8px;
+  }
+  span.abcjs-tempo-wrapper {
+      width: 100%;
+  }
 }
 
 </style>
@@ -344,29 +382,7 @@ color:#454545;
     <script src="/JS/recorder.js"></script>
     <script src="/JS/upload-audio.js"></script>
     <script src="/css/script.js"></script>
-    <script>
-      
-      /*		  
-			function renderAbc(abc) {
-			  ABCJS.renderAbc("abcRenderer", abc);
-			}
-			
-			$(document).ready(function () {
-			  const initialAbc = $('#abcRaw').text().trim();
-			  const noteSection = extractNoteSection(initialAbc);
-			  populateInputsFromAbc(initialAbc);
-			  renderAbc(initialAbc);
-			
-			  $('#updateAbcHeader').click(function () {
-			    const updatedAbc = buildAbcFromInputs(noteSection);
-			    $('#abcRaw').text(updatedAbc);
-			    renderAbc(updatedAbc);
-			  });
-			});
-					  
-			  */
-      
-    </script>
+
     <script>
       $(document).ready(function() {
 		
