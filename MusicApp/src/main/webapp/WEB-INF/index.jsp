@@ -132,7 +132,7 @@ color:#454545;
 
 </style>
 
-  <body class="bg-gray-50 min-h-screen p-8">
+  <body class="bg-gray-50 min-h-screen py-8 px-3">
     <div class="max-w-6xl mx-auto space-y-6">
       <!-- Header -->
       <div class="flex justify-between items-center">
@@ -167,21 +167,21 @@ color:#454545;
         </div>
       </div>
       <!-- Main Content -->
-      <div class="grid grid-cols-1  gap-6">
+      <div class="grid grid-cols-1 gap-6">
         <!-- Sheet Music -->
-        <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
+        <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 space-y-4">
           <c:if test="${not empty user.name}">
             <h2 class="text-xl font-semibold text-gray-900">
               Welcome ${user.name}!
             </h2>
           </c:if>
           <div id="music-sheet" class="relative sheet-music-placeholder h-64 rounded-lg bg-red-50 border-2 border-red-400 flex justify-center">
-            <div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2"
+            <div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2 flex flex-col sm:flex-row gap-5"
             style="transform: translate(-50%, -50%);">
-              <button class="recordButton bg-red-400 border-2 border-red-400 rounded p-3 px-4 text-white ">
+              <button class="recordButton bg-red-500 border-2 border-red-400 rounded p-3 px-4 text-white text-4xl sm:text-xl">
                 Record
               </button>
-              <button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600">
+              <button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600 text-4xl sm:text-xl">
                 Upload
               </button>
             </div>
@@ -232,34 +232,35 @@ color:#454545;
             <div class="bg-gray-50 shadow rounded px-3 pt-3 ">
               <div id="audio-controls"></div>
               <!--Buttons-->
-              <div class="flex flex-col py-3">
-                <div class="button-wrapper">
+              <div class="flex flex-col py-3 ">
+                <div class="button-wrapper flex gap-2 justify-between sm:justify-start">
                   <!-- Edit -->
                   <button class="p-2 border rounded-lg hover:bg-yellow-200" data-tooltip="Edit">
-                    <i data-feather="edit-2" class="w-5 h-5"></i>
+                    <i data-feather="edit-2" class="sm:w-5 sm:h-5"></i>
                   </button>
                   <!-- Download -->
                   <button id="midi-link" class="p-2 border rounded-lg hover:bg-purple-200"
                   data-tooltip="Download">
-                    <i data-feather="download" class="w-5 h-5"></i>
+                    <i data-feather="download" class="sm:w-5 sm:h-5"></i>
                   </button>
                   <!-- Save -->
                   <button id="music-save" class="p-2 border rounded-lg hover:bg-blue-200"
                   data-tooltip="Save">
-                    <i data-feather="save" class="w-5 h-5"></i>
+                    <i data-feather="save" class="sm:w-5 sm:h-5"></i>
                   </button>
                   <!-- Record -->
                   <button id="recordButton" class="p-2 recordButton border rounded-lg hover:bg-red-200 relative"
                   data-tooltip="Record">
-                    <i data-feather="mic" class="w-5 h-5"></i>
+                    <i data-feather="mic" class="sm:w-5 sm:h-5"></i>
                   </button>
                   <!-- Upload -->
                   <button id="upload-audio" class="p-2 border upload-button rounded-lg hover:bg-green-200"
                   data-tooltip="Upload Audio (.mp3 | .wav)">
-                    <i data-feather="upload" class="w-5 h-5"></i>
+                    <i data-feather="upload" class="sm:w-5 sm:h-5"></i>
                   </button>
+                </div>
                   <!-- Recording Controls: Initially hidden -->
-                  <div id="recording-controls" class="inline-flex" style="display: none;">
+                  <div id="recording-controls" class="inline-flex gap-2 my-2" style="display: none;">
                     <button id="stop-recording" class="p-2 rounded-lg border hover:bg-gray-200">
                       Stop
                     </button>
@@ -271,7 +272,6 @@ color:#454545;
                       Submit
                     </button>
                   </div>
-                </div>
                 <!-- Waveform canvas -->
                 <canvas id="waveform" style="display:none;height: 100px; border: 2pt solid #e94848; border-radius: 1rem; background: #fff0f0;">
                 </canvas>
@@ -281,7 +281,7 @@ color:#454545;
 		  <!-- Header Editor Section -->
 		   <div class="bg-white p-4 rounded shadow">
 		     <h2 class="text-xl font-bold mb-4">Settings</h2>
-		     <div class="grid grid-cols-2 gap-4">
+		     <div class="grid sm:grid-cols-2 gap-4">
 		       <label>Title: <input class="border p-1 w-full rounded" id="abc-title" placeholder="Music Sheet Title"></label>
 		       <label>Composer: <input class="border p-1 w-full rounded" id="abc-composer" placeholder="Music Sheet Writers Name"></label>
 		       <label>Meter:
