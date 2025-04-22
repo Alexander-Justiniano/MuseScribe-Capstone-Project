@@ -115,6 +115,20 @@ color:#454545;
 .abcjs-btn.abcjs-pushed{
 	background-color: #898989 !important;	
 }
+
+#notebook-dropdown-btn svg.open{
+	transform:rotate(270deg);
+}
+.notebooks-panel{
+	height:0;
+	overflow:hidden;
+	padding:0;
+}
+.notebooks-panel.open{
+	height:auto;
+}
+
+
 @media (max-width: 640px) {
   .sm-sheet-card {
     width: 100px !important;
@@ -178,9 +192,11 @@ color:#454545;
           <div id="music-sheet" class="relative sheet-music-placeholder h-64 rounded-lg bg-red-50 border-2 border-red-400 flex justify-center">
             <div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2 flex flex-col sm:flex-row gap-5"
             style="transform: translate(-50%, -50%);">
-              <button class="recordButton bg-red-500 border-2 border-red-400 rounded p-3 px-4 text-white text-4xl sm:text-xl">
+			<div  class="relative">
+              <button class="chooseRecordOption bg-red-500 border-2 border-red-400 rounded p-3 px-4 text-white text-4xl sm:text-xl">
                 Record
               </button>
+            </div>
               <button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600 text-4xl sm:text-xl">
                 Upload
               </button>
@@ -215,15 +231,20 @@ color:#454545;
               </div>
             </c:if>
             <div id="music-sheet-carousel" class="border rounded" style="display:none;">
-              <div class="bg-gray-200 flex p-1 text-center">
-                <button id='backToNotebooks' class="text-underline rounded bg-white mr-4 px-2 hover:bg-gray-100 transition-all duration-1500">
-                  Back
-                </button>
-                <h3 id="current-notebook-title" class="text-center text-lg "></h3>
+              <div class="bg-gray-200 flex p-1 text-center justify-between">
+                <div class="flex">					
+					<button id='backToNotebooks' class="text-underline rounded bg-white mr-4 px-2 hover:bg-gray-100 transition-all duration-1500">
+	                  Back
+	                </button>
+	                <h3 id="current-notebook-title" class="text-center text-lg "></h3>
+				</div>
+				<button id="notebook-dropdown-btn" class="px-1 hover:bg-gray-100 rounded-full">
+					<i data-feather="chevron-down" class="sm:w-5 sm:h-5 "></i>
+				</button>
               </div>
-              <div class="p-4">
+              <div class="notebooks-panel open">
 				<!--Render Music Sheets-->
-                <ul class="gap-4 grid grid-cols-7"></ul>
+                <ul class="gap-4 grid grid-cols-7 p-4"></ul>
               </div>
             </div>
           </div>
@@ -231,6 +252,7 @@ color:#454545;
           <div class=" sticky bottom-0 rounded pb-4 ">
             <div class="bg-gray-50 shadow rounded px-3 pt-3 ">
               <div id="audio-controls"></div>
+
               <!--Buttons-->
               <div class="flex flex-col py-3 ">
                 <div class="button-wrapper flex gap-2 justify-between sm:justify-start">
@@ -249,10 +271,22 @@ color:#454545;
                     <i data-feather="save" class="sm:w-5 sm:h-5"></i>
                   </button>
                   <!-- Record -->
-                  <button id="recordButton" class="p-2 recordButton border rounded-lg hover:bg-red-200 relative"
-                  data-tooltip="Record">
-                    <i data-feather="mic" class="sm:w-5 sm:h-5"></i>
-                  </button>
+				<div  class="relative">
+					<div id="chooseRecordOptionModal" style="display:none;" class="z-40 bg-white flex justify-between align-center flex-col border-2 shadow text-center rounded absolute p-2 -top-32 w-52 h-auto transform left-1/2 -translate-x-1/2">
+						<span>Choose an input device</span>
+						<div class="flex flex-col">
+							<button class="align-center border-2 gap-2.5 inline-flex justify-center mt-2.5 py-1.5 rounded recordButton" id="recordButton">
+								<img src="/IMGS/mic-icon.svg" alt="mic icon" width="20px" height="auto" /> Microphone
+							</button>
+							<button class="align-center border-2 gap-2.5 inline-flex justify-center mt-2.5 py-1.5 rounded" id="recordMidiButton">
+								<img src="/IMGS/keyboard-icon.svg" alt="midi icon" width="20px" height="auto" /> Midi
+							</button>
+						</div>
+					</div>
+					<button class="chooseRecordOption p-2 border rounded-lg hover:bg-red-200 relative" data-tooltip="Record">
+						<i data-feather="mic" class="sm:w-5 sm:h-5"></i>
+					</button>
+				</div>
                   <!-- Upload -->
                   <button id="upload-audio" class="p-2 border upload-button rounded-lg hover:bg-green-200"
                   data-tooltip="Upload Audio (.mp3 | .wav)">
@@ -360,7 +394,7 @@ color:#454545;
                       </p>
                     </div>
                     <!-- File input accepts only .wav and .mp3 -->
-                    <input id="modal-dropzone-file" type="file" class="hidden" accept=".wav,.mp3"
+                    <input id="modal-dropzone-file" type="file" class="hidden" accept=".wav,.mp3,.mid,.midi"
                     />
                   </label>
                 </div>
@@ -386,6 +420,92 @@ color:#454545;
     <script>
       $(document).ready(function() {
 		
+		
+		$("#notebook-dropdown-btn").on("click",function(){
+			$("#notebook-dropdown-btn svg").toggleClass("open");
+			$(".notebooks-panel").toggleClass("open");
+		})
+		
+		
+		
+		$(".chooseRecordOption").on("click",function(){
+			$("#chooseRecordOptionModal").insertBefore(this);
+			$("#chooseRecordOptionModal").show();
+		})
+		
+		
+		$(document).on('mousedown', function(event) {
+		    const $modal = $('#chooseRecordOptionModal');
+		    
+		    // If modal is visible and click is outside the modal
+		    if ($modal.is(':visible') && !$(event.target).closest('#chooseRecordOptionModal').length) {
+		        $modal.hide();
+		    }
+		});
+		
+		
+		$("#recordMidiButton").on('click', function(){
+			requestMIDIAccess()
+				requestMIDIAccess(MIDIOptions)
+				
+				navigator.permissions.query({ name: "midi", sysex: true }).then((result) => {
+				  if (result.state === "granted") {
+				    // Access granted.
+					let midi = null; // global MIDIAccess object
+					function onMIDISuccess(midiAccess) {
+					  console.log("MIDI ready!");
+					  midi = midiAccess; // store in the global (in real usage, would probably keep in an object instance)
+					}
+	
+					function onMIDIFailure(msg) {
+					  console.error(`Failed to get MIDI access - ${msg}`);
+					}
+	
+					navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+					
+					function listInputsAndOutputs(midiAccess) {
+					  for (const entry of midiAccess.inputs) {
+					    const input = entry[1];
+					    console.log(
+					      `Input port [type:'${input.type}']` +
+					        ` id:'${input.id}'` +
+					        ` manufacturer:'${input.manufacturer}'` +
+					        ` name:'${input.name}'` +
+					        ` version:'${input.version}'`,
+					    );
+					  }
+					  for (const entry of midiAccess.outputs) {
+					    const output = entry[1];
+					    console.log(
+					      `Output port [type:'${output.type}'] id:'${output.id}' manufacturer:'${output.manufacturer}' name:'${output.name}' version:'${output.version}'`,
+					    );
+					  }
+					}
+					
+					function onMIDIMessage(event) {
+					  let str = `MIDI message received at timestamp ${event.timeStamp}[${event.data.length} bytes]: `;
+					  for (const character of event.data) {
+					    str += `0x${character.toString(16)} `;
+					  }
+					  console.log(str);
+					}
+	
+					function startLoggingMIDIInput(midiAccess) {
+					  midiAccess.inputs.forEach((entry) => {
+					    entry.onmidimessage = onMIDIMessage;
+					  });
+					}
+				  } else if (result.state === "prompt") {
+				    // Using API will prompt for permission
+				  }
+				  // Permission was denied by user prompt or permission policy
+				});
+				
+		})
+		
+		
+		
+		// extract notes from abcNotation
 		function extractNoteSection(abc) {
 	        const lines = abc.split('\n');
 	        const noteLines = [];
@@ -398,7 +518,7 @@ color:#454545;
 	        }
 	        return noteLines.join('\n');
 	      }
-
+		// extra header values (e.g. T: title, Q: tempo, etc.) from abcNotaion
 	      function extractHeaderValue(abc, targetKey) {
 			let foundValue = null;
 			abc.split(/\r?\n/).forEach(line => {
@@ -415,6 +535,7 @@ color:#454545;
 			return foundValue;
 	      }
 
+		  // populate fields with abcNotaion header data
 		  function populateInputsFromAbc(abc) {
 
 		    $('#abc-title').val(extractHeaderValue(abc, 'T'));
@@ -449,7 +570,7 @@ color:#454545;
 		  function buildAbcFromInputs(noteSection) {
 
 			const headers = [
-			  "T:" + $("#abc-title").val(),
+			  "T:" + $("#abc-title").val() ? $("#abc-title").val() : "New Music Sheet",
 			  $("#abc-composer").val() ? "C:" + $("#abc-composer").val() : "",
 			  $("#abc-transcriber").val() ? "Z:" + $("#abc-transcriber").val() : "",
 			  $("#abc-meter").val() ? "M:" + $("#abc-meter").val() : "4/4",

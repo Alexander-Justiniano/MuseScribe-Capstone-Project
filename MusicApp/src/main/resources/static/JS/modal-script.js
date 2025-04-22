@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	// Utility: Validate .wav or .mp3
 	function isValidAudio(file) {
-		return /\.(wav|mp3)$/i.test(file.name);
+		return /\.(wav|mp3|mid|midi)$/i.test(file.name);
 	}
 
 	// Default drop zone HTML
