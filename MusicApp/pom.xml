@@ -10,7 +10,7 @@
 	<groupId>edu.mdc.capstone.musicapp</groupId>
 	<artifactId>MusicApp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>MusicApp</name>
 	<description>A music app developed by the students of the Capstone course at Miami Dade College North Campus during the Spring semester of 2025.</description>
 	<url/>
@@ -31,6 +31,11 @@
 	</properties>
 	<dependencies>
 		 <!-- DEPENDENCIES FOR STARTING SPRING PROJECTS-->
+		 <dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-data-mongodb</artifactId>
+		</dependency>
+
      	<dependency>
 	        <groupId>org.mongodb</groupId>
 	        <artifactId>mongodb-driver-sync</artifactId>
