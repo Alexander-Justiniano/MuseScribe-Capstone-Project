@@ -222,68 +222,30 @@ $(document).ready(function () {
   }
   // Start recording: create a new AudioContext, recorder, and analyser.
   async function startRecording() {
-  	try {
-  		const devices = await navigator.mediaDevices.enumerateDevices();
-  		const audioInput = devices.some(device => device.kind === 'audioinput');
-
-  		const midiAccess = await navigator.requestMIDIAccess({ sysex: true }).catch(() => null);
-  		const hasMIDIDevice = midiAccess && midiAccess.inputs.size > 0;
-
-  		if (!audioInput && !hasMIDIDevice) {
-  			alert("No audio or MIDI input devices found.");
-  			return;
-  		}
-
-  		let userChoice = null;
-
-  		if (audioInput && hasMIDIDevice) {
-  			userChoice = prompt("Both audio and MIDI devices are available. Type 'audio' or 'midi' to choose:");
-  			if (userChoice !== 'audio' && userChoice !== 'midi') {
-  				alert("Invalid input. Please restart and choose either 'audio' or 'midi'.");
-  				return;
-  			}
-  		} else {
-  			userChoice = audioInput ? 'audio' : 'midi';
-  		}
-
-  		if (userChoice === 'audio') {
-  			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  			audioStream = stream;
-  			audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  			const source = audioContext.createMediaStreamSource(stream);
-  			setupAnalyser(source);
-  			recorder = new Recorder(source, { numChannels: 1 });
-  			recorder.record();
-  			console.log("Recording started from microphone.");
-  		}
-
-  		if (userChoice === 'midi') {
-  			console.log("Initializing MIDI...");
-
-  			function onMIDIMessage(event) {
-  				let str = `MIDI message received at timestamp ${event.timeStamp}[${event.data.length} bytes]: `;
-  				for (const character of event.data) {
-  					str += `0x${character.toString(16)} `;
-  				}
-  				console.log(str);
-  			}
-
-  			function startLoggingMIDIInput(midiAccess) {
-  				midiAccess.inputs.forEach((input) => {
-  					input.onmidimessage = onMIDIMessage;
-  				});
-  			}
-
-  			startLoggingMIDIInput(midiAccess);
-  			console.log("MIDI input logging started.");
-  		}
-
-  	} catch (err) {
-  		console.error('Initialization error:', err);
-  		alert(`Error: ${err.message}`);
-  	}
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const audioInput = devices.some(device => device.kind === 'audioinput');
+      
+      if (!audioInput) {
+        console.error("No audio input devices found.");
+        return false;
+      }
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioStream = stream;
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(stream);
+      setupAnalyser(source);
+      recorder = new Recorder(source, { numChannels: 1 });
+      recorder.record();
+      console.log("Recording started from microphone.");
+      return true;
+      
+    } catch (err) {
+      console.error('Initialization error:', err);
+      return false;
+    }
   }
-
   
   function pauseRecording() {
     if (recorder && !isPaused) {
@@ -304,27 +266,33 @@ $(document).ready(function () {
     }
   }
   // --- Recording Controls Event Handlers ---
-  $recordButton.on('click', function () {
+  $recordButton.on('click', async function () {
     if (!isRecording || isPaused) {
-      isRecording = true;
-      isPaused = false;
-      startRecording();
-      $recordButton.find('i').attr('data-feather', 'pause');
-      feather.replace();
-      $("#recordButton").addClass('bg-red-100');
-      $waveformCanvas.show();
-      $('#recording-controls').show();
-      $('#stop-recording').show();
-      $('#submit-recording').hide();
+      isRecording = await startRecording();
+
+	  if(isRecording){		
+		  $("#recording-error").remove()
+		  isPaused = false;
+		  $recordButton.find('i').attr('data-feather', 'pause');
+		  feather.replace();
+		  $("#recordButton").addClass('bg-red-100');
+		  $waveformCanvas.show();
+		  $('#recording-controls').show();
+		  $('#stop-recording').show();
+		  $('#submit-recording').hide();
+	  }else{
+		$("#recording-error").remove();
+		$(this).before('<div id="recording-error" class="text-red-500 text-sm mb-2">Error Accessing Recording Device</div>');
+	  }
     } else {
       // Toggle pause/resume.
       if (!isPaused) {
         pauseRecording();
-        $("#recordButton").removeClass('bg-red-100');
+        $recordButton.removeClass('bg-red-100');
         $recordButton.find('i').attr('data-feather', 'play');
       } else {
         resumeRecording();
-        $("#recordButton").addClass('bg-red-100');
+        $recordButton.addClass('bg-red-100');
         $recordButton.find('i').attr('data-feather', 'pause');
       }
       feather.replace();
