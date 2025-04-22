@@ -69,7 +69,6 @@ color:#454545;
 	display: inline-flex !important;
 	width: 130px !important;
 	height: 152px;
-	justify-content: center;
 	cursor:pointer;
 	position:relative;
 }
@@ -80,7 +79,7 @@ color:#454545;
 	height: 152px;
 	justify-content: center;
 	background: #fff;
-	border: 1pt solid #454545;
+	border: 2pt solid #454545;
 	opacity:65%;
 	cursor:pointer;
 	position:relative;
@@ -212,17 +211,17 @@ color:#454545;
           <!-- User Music Sheets -->
           <div>
             <c:if test="${notebooks.size() > 0}">
-              <div id="notebook-carousel" class="border rounded p-4">
-                <h3 class="text-center text-lg">
+              <div id="notebook-carousel" class="border-2 rounded">
+                <h3 class="text-center text-lg bg-gray-200 p-1">
                   Your Notebooks
                 </h3>
-                <ul>
+                <ul class="p-4">
 				<!--Render Notebooks-->
                   <c:forEach var="nb" items="${notebooks}">
-                    <li class="notebook-sheet-card sheet-card uppercase rounded bg-gray-200 items-center font-bold flex-col"
+                    <li class="notebook-sheet-card sheet-card p-2 text-center uppercase rounded-lg bg-gray-100 border-gray-600 items-center font-bold flex-col justify-between border-2 border-white hover:border-gray-200 hover:bg-gray-200 transform transition-all duration-1500"
                     data-notebook-id="${nb.id}" data-notebook-title="${nb.title}">
                       ${nb.title}
-                      <span class="text-sm underline font-normal opacity-50">
+                      <span class="text-sm text-white font-normal bg-red-500 rounded-lg px-2 py-1 hover:bg-transparent border-2 border-red-500 hover:text-red-500">
                         Open Book
                       </span>
                     </li>
@@ -635,7 +634,7 @@ color:#454545;
             }
             sheets.forEach((sheet, idx) => {
               const number = idx + 1;
-			  $('#music-sheet-carousel ul').append("<li id='sheet-music-" + number + "' class='sm-sheet-card rounded' data-musicsheet-data='" + sheet.abcNotation + "' data-musicsheet-title='" + sheet.title + "'>" + sheet.title + "</li>");
+			  $('#music-sheet-carousel ul').append("<li id='sheet-music-" + number + "' class='sm-sheet-card rounded-lg' data-musicsheet-data='" + sheet.abcNotation + "' data-musicsheet-title='" + sheet.title + "'>" + sheet.title + "</li>");
             });
 
             let musicSheetList = [];
