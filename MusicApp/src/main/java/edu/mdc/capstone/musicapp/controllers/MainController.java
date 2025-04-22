@@ -32,14 +32,15 @@ public class MainController {
 
 //	*************************************************************** GET Requests ***************************************************************
 
-	@GetMapping("/")
-	public String index() {
-		return "index.jsp";
+
+	@GetMapping("")
+	public String login() {
+		return "MuseScribeLogin.jsp";
 	}
 
-	@GetMapping("/login")
-	public String login() {
-		return "login.jsp";
+	@GetMapping("/dashboard")
+	public String index() {
+		return "index.jsp";
 	}
 
 //	*************************************************************** POST Requests ***************************************************************
