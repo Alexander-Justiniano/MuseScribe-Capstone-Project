@@ -29,8 +29,8 @@
 	
 	 -->
 <div class="h-screen flex justify-center items-center">
-    <div class="flex gap-6 p-10">
-            <div class="w-1/2 bg-grey-500 p-5 flex flex-col justify-center items-center text-center">
+    <div class="flex justify-between p-10">
+            <div class="w-1/2 bg-grey-500 p-5 flex flex-col justify-center items-center text-center mr-40">
                 <div id="login-logo">
                     <img src="/IMGS/musescribe-logo.svg" alt="login-logo">
                 </div>
@@ -64,10 +64,12 @@
 				<hr class="border-gray-400 my-5">
                 <div id="third-party-login" class="mb-5">
                     <!-- *******************CLICKING ON THE IMAGE NEEDS TO MAKE AN API CALL TO THE GOOGLE AUTHENTICATION SERVICE******************* -->
-	                <a class="flex flex-row items-center mx-auto justify-center w-1/2 py-2 gap-2 bg-white border-2 rounded border-gray-400" href="#">
+                    
+	                <a class="flex flex-row items-center mx-auto justify-center w-1/2 py-2 gap-2 bg-white border-2 rounded border-gray-400" href="/dashboard">
 	    				<img src="/IMGS/colorGoogleIcon.png" alt="Google Logo" width="100"> 
 						<span>Google Login</span>
 					</a>
+
                 </div>
                 <div id="form-extras" class="flex flex-col gap-7 mt-5">
                     <!-- *******************NEEDS TO REDIRECT USER TO THE "FORGOT PASSWORD" PAGE******************* -->
@@ -77,7 +79,9 @@
                     </div>
                     <!-- *******************NEEDS TO REDIRECT USER TO THE "REGISTRATION" PAGE******************* -->
                     <!-- Add route to registration page -->
-                    <p>Don't have an account already? <br/> <a class="underline" href="#">Sign up now!</a></p>
+
+                    <p>Don't have an account already? <a class="underline" href="/register">Sign up now!</a></p>
+
                 </div>
             </div>
     </div>
