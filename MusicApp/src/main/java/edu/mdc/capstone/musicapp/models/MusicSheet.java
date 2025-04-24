@@ -12,7 +12,8 @@ public class MusicSheet {
 	private String title;
 	private String abcNotation;
 	private Date createdAt;
-
+    private Date updatedAt;  // <-- new field
+    
 	public String getId() {
 		return id;
 	}
@@ -51,5 +52,13 @@ public class MusicSheet {
 
 	public void setNotebookId(String notebookId) {
 		this.notebookId = notebookId;
+	}
+
+	public Date getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(Date updatedAt) {
+		this.updatedAt = updatedAt;
 	}
 }

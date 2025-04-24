@@ -5,7 +5,6 @@ import edu.mdc.capstone.musicapp.models.Notebook;
 import edu.mdc.capstone.musicapp.service.MusicSheetService;
 import edu.mdc.capstone.musicapp.service.NotebookService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +16,7 @@ public class NotebookController {
 
     private final NotebookService   notebookService;
     private final MusicSheetService musicSheetService;
-
-    @Autowired  // Spring will wire both beans here
+    
     public NotebookController(NotebookService notebookService,
                               MusicSheetService musicSheetService) {
         this.notebookService   = notebookService;

@@ -63,6 +63,8 @@ public class MainController {
 	            model.addAttribute("error", "User not found");
 	            return "index.jsp";
 	        }
+	        
+	        
 
 	        User user = userOpt.get();
 	        model.addAttribute("user", user);
@@ -97,6 +99,4 @@ public class MainController {
         return "redirect:/dashboard";
     }    
 
-//	*************************************************************** GET Requests ***************************************************************
-    
 }
