@@ -25,15 +25,15 @@
                 <div id="elements-container">
                 	<form:form method="post" action="/register" modelAttribute="newUser">
 	                    <div class="form-element">
+	                        <form:label path="name">Name:</form:label>
+	                        <form:input type="text" path="name" placeholder="John Doe"></form:input>
+	                    </div>
+	                    <div class="error-container"><form:errors path="name" class="css-error"/></div>
+	                    <div class="form-element">
 	                        <form:label path="email">Email:</form:label>
-	                        <form:input type="email" path="email" placeholder="youraddress@email.com"></form:input>
+	                        <form:input type="email" path="email" placeholder="youremail@address.com"></form:input>
 	                    </div>
 	                    <div class="error-container"><form:errors path="email" class="css-error"/></div>
-	                    <div class="form-element">
-	                        <form:label path="userName">Username:</form:label>
-	                        <form:input type="text" path="userName" placeholder="userName123"></form:input>
-	                    </div>
-	                    <div class="error-container"><form:errors path="userName" class="css-error"/></div>
 	                    <div class="form-element">
 	                        <form:label path="password">Password:</form:label>
 	                        <form:input type="password" path="password" placeholder="password456"></form:input>
