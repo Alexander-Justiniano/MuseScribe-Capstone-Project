@@ -58,7 +58,7 @@ public class MainController {
 	@Autowired
     private NotebookService notebookService;
 
-    @GetMapping("/{userId}")
+    @GetMapping("/dashboard/{userId}")
     public String userHome(@PathVariable String userId, Model model) {
         Optional<User> userOpt = userService.getUserById(userId);
         if (userOpt.isEmpty()) {

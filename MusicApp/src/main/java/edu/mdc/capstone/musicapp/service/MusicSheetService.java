@@ -66,6 +66,22 @@ public class MusicSheetService {
           .orElse(Collections.emptyList());
     }    
 
+    /**
+     * Updates an existing MusicSheet's title and notation.
+     */
+    public MusicSheet updateMusicSheet(MusicSheet updatedSheet) {
+        return musicSheetRepository.findById(updatedSheet.getId())
+            .map(existing -> {
+                existing.setTitle(updatedSheet.getTitle());
+                existing.setAbcNotation(updatedSheet.getAbcNotation());
+                existing.setUpdatedAt(new Date());
+                return musicSheetRepository.save(existing);
+            })
+            .orElseThrow(() -> new NoSuchElementException(
+                "MusicSheet not found: " + updatedSheet.getId()
+            ));
+    }
+
     
     /**
      * Deletes a MusicSheet and removes its reference from its parent notebook.
