@@ -14,16 +14,29 @@ public class MusicSheetController {
 	@Autowired
 	private MusicSheetService musicSheetService;
 
-	@PostMapping("/{userId}")
-	public ResponseEntity<?> addSheet(@PathVariable String userId, @RequestBody MusicSheet sheet) {
-		return ResponseEntity.ok(musicSheetService.createMusicSheet(userId, sheet));
+	@PostMapping("/{notebookId}")
+	public ResponseEntity<?> addSheet(@PathVariable String notebookId, @RequestBody MusicSheet sheet) {
+		return ResponseEntity.ok(musicSheetService.createMusicSheet(notebookId, sheet));
 	}
 
-	@GetMapping("/{userId}")
-	public ResponseEntity<?> getSheetsByUser(@PathVariable String userId) {
-		List<MusicSheet> sheets = musicSheetService.getSheetsByNotebook(userId);
+	@GetMapping("/{notebookId}")
+	public ResponseEntity<?> getSheetsByUser(@PathVariable String notebookId) {
+		List<MusicSheet> sheets = musicSheetService.getSheetsByNotebook(notebookId);
 		return ResponseEntity.ok(sheets);
 	}
+	
+    // new update
+    @PutMapping("/{sheetId}")
+    public ResponseEntity<MusicSheet> updateSheet(
+            @PathVariable String sheetId,
+            @RequestBody MusicSheet sheet
+    ) {
+        // ensure the incoming POJO has the correct ID
+        sheet.setId(sheetId);
+        MusicSheet updated = musicSheetService.updateMusicSheet(sheet);
+        return ResponseEntity.ok(updated);
+    }
+
 
 	@DeleteMapping("/{sheetId}")
 	public ResponseEntity<?> deleteSheet(@PathVariable String sheetId) {
