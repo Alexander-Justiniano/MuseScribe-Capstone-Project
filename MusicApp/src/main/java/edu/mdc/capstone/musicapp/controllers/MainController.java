@@ -34,7 +34,7 @@ public class MainController {
 //	*************************************************************** GET Requests ***************************************************************
 
 
-	@GetMapping("")
+	@GetMapping("/")
 	public String login() {
 		return "MuseScribeLogin.jsp";
 	}
@@ -48,7 +48,7 @@ public class MainController {
 
 	@GetMapping("/dashboard")
 	public String index() {
-		return "index.jsp";
+		return "MuseScribeLogin.jsp";
 	}
 	
 	@GetMapping("/endpoint-test")
@@ -56,7 +56,7 @@ public class MainController {
 		return "endpoint-test.jsp";
 	}
 	
-	 @GetMapping("/{userId}")
+	 @GetMapping("/dashboard/{userId}")
 	    public String userHome(@PathVariable String userId, Model model) {
 	        Optional<User> userOpt = userService.getUserById(userId);
 	        if (userOpt.isEmpty()) {

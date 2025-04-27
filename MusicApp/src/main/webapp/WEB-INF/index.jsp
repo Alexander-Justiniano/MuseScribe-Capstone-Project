@@ -135,6 +135,22 @@ button:disabled, button:disabled:hover{
 	border-color:#e3e3e3;
 }
 
+div#loading {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: rgb(255 255 255 / 80%);
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 25px;
+    backdrop-filter: blur(3px);
+}
 @media (max-width: 640px) {
   .sm-sheet-card {
     width: 100px !important;
@@ -157,6 +173,14 @@ button:disabled, button:disabled:hover{
 </style>
 
   <body class="bg-gray-50 min-h-screen py-8 px-3">
+	<!-- Loading indicator shown while processing requests -->
+	<div id="loading" class="flex items-center" style="display:none;">
+	  <p>
+	    Processing... Please wait.
+	  </p>
+	  <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading icon" class="w-6 ml-2">
+	</div>
+	
 	<!-- Modal for Drag-n-Drop Upload -->
    <div id="uploadModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-40">
      <div class="bg-white w-96 p-6 rounded-lg relative">
@@ -250,21 +274,14 @@ button:disabled, button:disabled:hover{
           <div id="music-sheet" class="relative sheet-music-placeholder h-64 rounded-lg bg-red-50 border-2 border-red-400 flex justify-center">
             <div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2 flex flex-col sm:flex-row gap-5"
             style="transform: translate(-50%, -50%);">
-			<div  class="relative">
-              <button class="chooseRecordOption bg-red-500 border-2 border-red-400 rounded p-3 px-4 text-white text-4xl sm:text-xl">
-                Record
-              </button>
-            </div>
-              <button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600 text-4xl sm:text-xl">
-                Upload
-              </button>
-            </div>
-            <!-- Loading indicator shown while processing requests -->
-            <div id="loading" class="flex items-center" style="display:none;">
-              <p>
-                Processing... Please wait.
-              </p>
-              <img src="https://i.gifer.com/ZZ5H.gif" alt="Loading icon" class="w-6 ml-2">
+				<div  class="relative">
+				  <button class="chooseRecordOption bg-red-500 border-2 border-red-400 rounded p-3 px-4 text-white text-4xl sm:text-xl">
+				    Record
+				  </button>
+				</div>
+				<button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600 text-4xl sm:text-xl">
+				    Upload
+				</button>
             </div>
           </div>
           <!-- User Music Sheets -->
