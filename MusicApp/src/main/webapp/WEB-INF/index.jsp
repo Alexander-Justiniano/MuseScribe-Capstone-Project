@@ -382,7 +382,7 @@ div#loading {
                   <!-- Recording Controls: Initially hidden -->
                   <div id="recording-controls" class="inline-flex gap-2 my-2" style="display: none;">
                     <button id="stop-recording" class="p-2 rounded-lg border hover:bg-gray-200">
-                      <i data-feather="pause-circle" class="sm:w-5 sm:h-5"></i>
+                      <i data-feather="stop-circle" class="sm:w-5 sm:h-5"></i>
                     </button>
                     <button id="reset-recording" class="p-2 rounded-lg border hover:bg-gray-200">
                       <i data-feather="refresh-ccw" class="sm:w-5 sm:h-5"></i>

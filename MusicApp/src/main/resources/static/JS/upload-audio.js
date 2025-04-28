@@ -391,9 +391,10 @@ $(document).ready(function () {
 
   // Recording controls
   let isRecording = false, isPaused = false, recorder, audioStream, audioContext, recordedBlob, analyser, dataArray, animationId;
-  const $recordButton    = $('.recordButton');
-  const $stopButton      = $('#stop-recording');
-  const $waveformCanvas  = $('#waveform');
+  const $recordButton      = $('.recordButton');
+  const $stopButton        = $('#stop-recording');
+  const $waveformCanvas    = $('#waveform');
+  const $recordOptionModal = $('#chooseRecordOptionModal');
 
   $recordButton.on('click', async function () {
     if (!isRecording || isPaused) {
@@ -402,6 +403,8 @@ $(document).ready(function () {
         isRecording = true;
         isPaused = false;
 		$waveformCanvas.show()
+		$stopButton.prop('disabled', false)
+		$recordOptionModal.hide()
 		$("#recording-controls").show()
 		requestAnimationFrame(drawWaveform);
       } else {
@@ -424,8 +427,10 @@ $(document).ready(function () {
     if (isRecording) {
       stopRecording();
       $("#recordButton").removeClass('bg-red-100');
+	  $(this).prop('disabled', true)
       $(this).removeClass('bg-red-100 animate-pulse text-red-700');
       $('#submit-recording').show();
+	  $waveformCanvas.hide()
       $recordButton.find('i').attr('data-feather', 'mic');
       feather.replace();
 
