@@ -573,7 +573,7 @@ $(document).ready(function () {
     // grab title & notation
     const title       = $('#abc-title').val().trim() || "Music Sheet Title";
     const abcNotation = TRANSCRIPTED_SHEET_MUSIC || "";
-	const requestType = $(this).data('save-type') == crud.UPDATE
+	const requestType = $(this).data('save-type') == crud.UPDATE ? true : false; 
 
     // see if we're editing an existing sheet:
     const sheetId = CURRENT_MUSIC_SHEET_ID;
