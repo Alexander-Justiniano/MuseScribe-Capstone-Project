@@ -94,6 +94,7 @@ $(document).ready(function () {
 	 }
 
 	 function stopRecording() {
+		isRecording = false;
 		if (recorder) {
 			if (!isPaused) recorder.stop();
 			if (audioStream) audioStream.getTracks().forEach(track => track.stop());
@@ -422,7 +423,6 @@ $(document).ready(function () {
   $stopButton.on('click', function () {
     if (isRecording) {
       stopRecording();
-      isRecording = false;
       $("#recordButton").removeClass('bg-red-100');
       $(this).removeClass('bg-red-100 animate-pulse text-red-700');
       $('#submit-recording').show();
@@ -449,10 +449,20 @@ $(document).ready(function () {
     })
       .then(res => res.json())
       .then(data => {
-        if (data.transcription?.abc_notation) {
-          updateSheetMusic(data.transcription.abc_notation);
+		const notation = data?.transcription?.abc_notation
+        if (notation) {
+		  TRANSCRIPTED_SHEET_MUSIC = notation;
+	  	  EXTRACTED_NOTES = extractNoteSection(notation);		  	  
+          updateSheetMusic(notation);
+		  populateInputsFromAbc(notation);
+	  	  $allSettingsPanelInputs.prop('disabled', false);
+	  	  $("#music-save").data("save-type",crud.CREATE).attr('data-save-type',crud.CREATE);
           $("#music-save, #midi-link").prop('disabled', false);
           $("#submit-recording").prop('disabled', true);
+          $("#waveform, #recording-controls").hide();
+		  $("#music-sheet").removeClass('bg-red-50 border-red-400');
+		  
+		  
         } else {
           alert('Transcription failed: ' + (data.error || 'unknown error'));
           $('#loading').hide();
@@ -467,12 +477,12 @@ $(document).ready(function () {
 
   $('#reset-recording').on('click', function () {
     if (recorder) recorder.clear();
+	stopRecording();
     recordedBlob = null;
-    isRecording = false;
     isPaused = false;
     $('#recording-controls').hide();
     $waveformCanvas.hide();
-    $("#recordButton").removeClass('bg-red-100').prop('disabled', false).find('i').attr('data-feather', 'mic');
+    $recordButton.removeClass('bg-red-100').prop('disabled', false).find('i').attr('data-feather', 'mic');
     feather.replace();
     clearCanvas();
   });
