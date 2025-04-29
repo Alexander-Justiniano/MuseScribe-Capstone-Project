@@ -1,0 +1,106 @@
+@charset "ISO-8859-1";
+
+*{
+    margin: 0;
+
+}
+
+body{
+    font-family: sans-serif;
+    width: auto;
+    font-size: 1.2rem;
+}
+#login-logo img{
+    width: 550px;
+
+}
+.form-element{
+	margin: 0.5rem 0.5rem;
+	display: flex;
+    flex-direction: column;
+}
+#slogan{
+    margin-top: 40px;
+    font-size: x-large;
+}
+
+#form{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+
+#login-btn{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#submit-btn{
+    display: inline-block;
+    color: #FFFF;
+    background-color: #dc2626;
+    border-radius: 5px;
+    border: none;
+    font-size: 1.2rem;
+    width: 150px;
+    padding: 5px;
+    margin-top: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.5s;
+    box-shadow: 0 5px #a5a4a0
+}
+
+#submit-btn span{
+    position: relative;
+    transition: 0.5s;
+}
+
+#submit-btn span::after{
+    content: '\00BB' ;
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+}
+
+#submit-btn:hover span{
+    padding-right: 25px;
+}
+
+#submit-btn:hover span::after{
+    opacity: 1;
+    right: 0;
+}
+
+#submit-btn:active{
+    transform: translateY(8px);
+}
+
+#third-party-login img{
+    width: 35px;
+}
+
+#form-extras{
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.css-error{
+	font-size: 1.2rem;
+	color: #cc0000
+}
+
+#login-logo img{
+	margin-top: 80px;
+	width: 300px;
+}
