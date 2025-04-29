@@ -22,20 +22,13 @@ public class NotebookController {
         this.notebookService   = notebookService;
         this.musicSheetService = musicSheetService;
     }
+    
+    
+    
+//	*************************************************************** GET Requests ***************************************************************
 
-    /**
-     * Create a new Notebook for the given user.
-     * POST /api/notebooks/{userId}
-     */
-    @PostMapping("/{userId}")
-    public ResponseEntity<Notebook> createNotebook(
-            @PathVariable String userId,
-            @RequestBody Notebook notebook
-    ) {
-        Notebook created = notebookService.createNotebook(userId, notebook);
-        return ResponseEntity.ok(created);
-    }
-
+    
+    
     /**
      * List all Notebooks belonging to a user.
      * GET /api/notebooks/{userId}
@@ -59,6 +52,30 @@ public class NotebookController {
         List<MusicSheet> sheets = musicSheetService.getSheetsByNotebook(notebookId);
         return ResponseEntity.ok(sheets);
     }
+    
+    
+    
+//	*************************************************************** POST Requests ***************************************************************
+
+
+    
+    /**
+     * Create a new Notebook for the given user.
+     * POST /api/notebooks/{userId}
+     */
+    @PostMapping("/{userId}")
+    public ResponseEntity<Notebook> createNotebook(
+            @PathVariable String userId,
+            @RequestBody Notebook notebook
+    ) {
+        Notebook created = notebookService.createNotebook(userId, notebook);
+        return ResponseEntity.ok(created);
+    }
+    
+    
+    
+//	*************************************************************** DELETE Requests ***************************************************************
+
 
     /**
      * Delete a Notebook (and optionally all sheets inside it).

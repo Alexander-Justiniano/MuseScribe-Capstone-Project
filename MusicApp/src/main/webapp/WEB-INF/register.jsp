@@ -45,11 +45,16 @@
 	                    </div>
 	                    <div class="error-container"><form:errors path="confirm" class="css-error"/></div>
                 	<div id="form-extras">
+                	<!-- Sign Up with Google -->
                     	<h3>Sign up with:</h3>
-                <!-- *******************CLICKING ON THE IMAGE NEEDS TO MAKE AN API CALL TO THE GOOGLE AUTHENTICATION SERVICE******************* -->
-                    	<a href="#">
-                        	<img src="/IMGS/colorGoogleIcon.png" alt="google logo">
-                    	</a>
+			                <div id="third-party-login" class="mb-5">
+					            <a 
+					              class="flex flex-row items-center mx-auto justify-center w-1/2 py-2 gap-2 bg-white border-2 rounded border-gray-400" 
+					              href="/oauth2/authorization/google"
+					            >
+					              <img src="/IMGS/colorGoogleIcon.png" alt="Google Logo" width="100"> 
+					            </a>
+					        </div>
                     	<div>
                         	<input id="submit-btn" type="submit" value="Create Account">
                     	</div>

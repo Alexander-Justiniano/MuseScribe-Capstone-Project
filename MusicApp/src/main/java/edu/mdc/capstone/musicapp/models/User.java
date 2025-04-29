@@ -9,7 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -27,8 +26,8 @@ public class User {
     @Email(message="Please enter a valid email")
     private String email;
     
-    @NotBlank(message="Game Name is required!")
-    @Size(min=1, max=30, message="Game name must be between 1 and 30 characters")
+    @NotBlank(message="Name is required!")
+    @Size(min=1, max=30, message="Name must be between 1 and 30 characters")
     private String name;
     
     @NotBlank(message="Password is required!")

@@ -8,7 +8,8 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import edu.mdc.capstone.musicapp.models.User;
 
 public interface UserRepository extends MongoRepository<User, String> {
-    User findByGoogleId(String googleId);
+   
+	Optional <User> findByGoogleId(String googleId);
     
 	List<User> findAll();
 	

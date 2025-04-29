@@ -13,13 +13,7 @@
 
 <!-- TODO: 
 
--Routes for appropriate links need to be added 
--Work on midi file upload feature
--Import ABCjs library and work on incorporating its features
 -Work on DarkMode feature 
--Finish Tooltip feature
--Track playback and transcription polish
--Work on sheet music download feature
 
 -->
 
@@ -221,21 +215,20 @@ button:disabled, button:disabled:hover{
               </i>
             </button>
             <div class="dropdown-content">
-              <a class="hover:bg-gray-300" href="#">
-                Profile
-              </a>
-              <a class="hover:bg-gray-300" href="#">
-                Settings
-              </a>
-              <a class="hover:bg-gray-300" href="/login">
-                Login
-              </a>
-              <button class="hover:bg-gray-300" style="display: block;padding: 10px;text-decoration: none;color: black;width: 100%;text-align: left;"
-              id="fetchDataBtn">
-                Fetch Data
-              </button>
-            </div>
-          </div>
+            	<button class="hover:bg-gray-300" style="display: block;padding: 10px;text-decoration: none;color: black;width: 100%;text-align: left;"
+              		id="fetchDataBtn">
+                		Fetch Data
+             		</button>
+             		<a class="hover:bg-gray-300" href="${pageContext.request.contextPath}/profile/${user.id}">
+                		Profile
+              		</a>
+              		<a 
+					  href="${pageContext.request.contextPath}/logout" 
+					  class="block w-full text-left px-4 py-2 hover:bg-gray-300 round">
+					  Log Out
+					</a>
+            	</div>
+          	</div>
         </div>
       </div>
       <!-- Main Content -->
