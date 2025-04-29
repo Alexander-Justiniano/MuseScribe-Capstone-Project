@@ -315,6 +315,50 @@ $(document).ready(function () {
     }
   }
 
+  async function uploadMidi(blob, filename) {
+    $('#loading').show();
+    const form = new FormData();
+    form.append("file", blob, filename);
+
+    const res = await fetch(
+      "https://secure-darling-minnow.ngrok-free.app/upload",
+      {
+        method: "POST",
+        headers: { "ngrok-skip-browser-warning": "true" },
+        body: form
+      }
+    );
+
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  }
+
+  function handleTranscription(data) {
+    const notation = data?.transcription?.abc_notation;
+    resetModalDropZone();
+    $('#loading').hide();
+
+    if (!notation) {
+      alert("Transcription failed: " + (data.error || "unknown error"));
+      $('#music-sheet').show();
+      return;
+    }
+
+    TRANSCRIPTED_SHEET_MUSIC = notation;
+    EXTRACTED_NOTES          = extractNoteSection(notation);
+
+    $("#music-sheet")
+      .removeClass("bg-red-50 border-red-400");
+    $("#music-save")
+      .data("save-type", crud.CREATE)
+      .attr("data-save-type", crud.CREATE);
+
+    updateSheetMusic(notation);
+    populateInputsFromAbc(notation);
+    $("#settings-panel input, #settings-panel select, #settings-panel button")
+      .prop("disabled", false);
+  }
+  
   //------------------------------------------------------
   // Event Handlers
   //------------------------------------------------------
@@ -390,7 +434,7 @@ $(document).ready(function () {
   });
 
   // Recording controls
-  let isRecording = false, isPaused = false, recorder, audioStream, audioContext, recordedBlob, analyser, dataArray, animationId;
+  let isRecording = false, isPaused = false, recorder, audioStream, audioContext, recordedBlob, analyser, dataArray;
   const $recordButton      = $('.recordButton');
   const $stopButton        = $('#stop-recording');
   const $waveformCanvas    = $('#waveform');
@@ -633,85 +677,55 @@ $(document).ready(function () {
   });
 
   // MIDI RECORD TRIGGER LOGIC
-  $("#recordMidiButton").on('click', async function () {
-  try {
-	  // Request MIDI access with sysex permissions
-	  const permissionStatus = await navigator.permissions.query({ name: "midi", sysex: true });
-	  if (permissionStatus.state !== "granted") {
-		  alert('MIDI permission not granted.');
-		  return;
-	  }
-	
-	  const midiAccess = await navigator.requestMIDIAccess({ sysex: true });
-	  console.log("MIDI ready!");
-	
-	  let capturedData = [];
-	
-	  for (const entry of midiAccess.inputs.values()) {
-	    entry.onmidimessage = function (event) {
-	      let message = [];
-	      event.data.forEach(byte => message.push(byte));
-	      capturedData.push({ timeStamp: event.timeStamp, data: message });
-	      console.log("Captured MIDI Message:", message);
-	    };
-	  }
+  $("#recordMidiButton").on("click", async () => {
+    if (!navigator.requestMIDIAccess) {
+      alert("Web MIDI is not supported in this browser.");
+      return;
+    }
 
-	  // After some delay (e.g., after recording for a few seconds), send data
-	  setTimeout(async () => {
-	    if (capturedData.length === 0) {
-	      alert('No MIDI data captured.');
-	      return;
-	    }
-	
-	    const midiBlob = new Blob([JSON.stringify(capturedData)], { type: "application/json" }); // TEMP: Save JSON for testing
-	    // In real life, you'd want a real .mid file here or conversion logic.
-	
-	    const formData = new FormData();
-	    formData.append('file', midiBlob, 'capture.midi'); // Name it .midi
-	
-	    $('#loading').show();
-	    $("#music-save, #midi-link").prop('disabled', false);
-	    $('#uploadModal').addClass('hidden');
-	
-	    try {
-	      const response = await fetch('https://secure-darling-minnow.ngrok-free.app/upload', {
-	        method: 'POST',
-	        body: formData,
-	      });
-	
-	      const data = await response.json();
-	      const notation = data.transcription?.abc_notation;
-	
-	      resetModalDropZone();
-	
-	      if (notation) {
-	        TRANSCRIPTED_SHEET_MUSIC = notation;
-	        EXTRACTED_NOTES = extractNoteSection(notation);
-	
-	        $("#music-sheet").removeClass("bg-red-50 border-red-400");
-	        $("#music-save").data("save-type", crud.CREATE).attr('data-save-type', crud.CREATE);
-	
-	        updateSheetMusic(notation);
-	        populateInputsFromAbc(notation);
-	        $allSettingsPanelInputs.prop('disabled', false);
-	      } else {
-	        alert('Transcription failed: ' + (data.error || 'unknown error'));
-	        $('#loading').hide();
-	        $('#music-sheet').show();
-	      }
-	
-	    } catch (err) {
-	      console.error('Upload error:', err);
-	      $('#loading').hide();
-	    }
-	  }, 5000); // ⏲️ Record MIDI for 5 seconds before sending to server
-	  // NOTEBOOK CARD CLICK LOGIC
+    try {
+      // This call triggers the permission prompt
+      const midiAccess = await navigator.requestMIDIAccess({ sysex: true });
+      console.log("MIDI ready!", midiAccess);
 
-	  } catch (error) {
-		  console.error("Error initializing MIDI:", error);
-		  alert("Error initializing MIDI: " + error.message);
-	  }
+      const capturedData = [];
+
+      midiAccess.inputs.forEach(input => {
+        input.onmidimessage = evt => {
+          capturedData.push({
+            timeStamp: evt.timeStamp,
+            data: [...evt.data]         // spread keeps it readable
+          });
+          console.log("Captured MIDI:", [...evt.data]);
+        };
+      });
+
+      // Record for 5 s, then upload
+      setTimeout(async () => {
+        if (!capturedData.length) {
+          alert("No MIDI data captured.");
+          return;
+        }
+
+        try {
+          const jsonBlob  = new Blob([JSON.stringify(capturedData)], {
+            type: "application/json"
+          });
+          const result = await uploadMidi(jsonBlob, "capture.midi");
+          handleTranscription(result);
+        } catch (err) {
+          console.error("Upload error:", err);
+          $('#loading').hide();
+        }
+      }, 5000);
+    } catch (err) {
+      // User hit “Block” or device unavailable
+      console.error("MIDI access failed:", err);
+      alert("Unable to access MIDI devices: " + err.message);
+    }
   });
+  
+	// Notebook click logic
   $('#notebook-carousel').on('click', '.notebook-sheet-card', function () {
     const notebookId    = $(this).data('notebook-id');
     const notebookTitle = $(this).data('notebook-title');
