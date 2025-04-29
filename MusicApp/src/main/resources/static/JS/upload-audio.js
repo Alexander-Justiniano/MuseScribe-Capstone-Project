@@ -633,32 +633,85 @@ $(document).ready(function () {
   });
 
   // MIDI RECORD TRIGGER LOGIC
-  $("#recordMidiButton").on('click', function () {
-    requestMIDIAccess();
-    requestMIDIAccess(MIDIOptions);
+  $("#recordMidiButton").on('click', async function () {
+  try {
+	  // Request MIDI access with sysex permissions
+	  const permissionStatus = await navigator.permissions.query({ name: "midi", sysex: true });
+	  if (permissionStatus.state !== "granted") {
+		  alert('MIDI permission not granted.');
+		  return;
+	  }
+	
+	  const midiAccess = await navigator.requestMIDIAccess({ sysex: true });
+	  console.log("MIDI ready!");
+	
+	  let capturedData = [];
+	
+	  for (const entry of midiAccess.inputs.values()) {
+	    entry.onmidimessage = function (event) {
+	      let message = [];
+	      event.data.forEach(byte => message.push(byte));
+	      capturedData.push({ timeStamp: event.timeStamp, data: message });
+	      console.log("Captured MIDI Message:", message);
+	    };
+	  }
 
-    navigator.permissions.query({ name: "midi", sysex: true }).then(result => {
-      if (result.state === "granted") {
-        navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
-        function onMIDISuccess(midiAccess) {
-          console.log("MIDI ready!");
-          for (const entry of midiAccess.inputs) entry[1].onmidimessage = onMIDIMessage;
-          for (const entry of midiAccess.outputs) { /* ... */ }
-        }
-        function onMIDIFailure(msg) {
-          console.error("Failed to get MIDI access", msg);
-        }
-        function onMIDIMessage(event) {
-          let str = `MIDI message at ${event.timeStamp}: `;
-          event.data.forEach(byte => { str += "0x"+byte.toString(16); });
-          console.log(str);
-        }
-      }
-    });
+	  // After some delay (e.g., after recording for a few seconds), send data
+	  setTimeout(async () => {
+	    if (capturedData.length === 0) {
+	      alert('No MIDI data captured.');
+	      return;
+	    }
+	
+	    const midiBlob = new Blob([JSON.stringify(capturedData)], { type: "application/json" }); // TEMP: Save JSON for testing
+	    // In real life, you'd want a real .mid file here or conversion logic.
+	
+	    const formData = new FormData();
+	    formData.append('file', midiBlob, 'capture.midi'); // Name it .midi
+	
+	    $('#loading').show();
+	    $("#music-save, #midi-link").prop('disabled', false);
+	    $('#uploadModal').addClass('hidden');
+	
+	    try {
+	      const response = await fetch('https://secure-darling-minnow.ngrok-free.app/upload', {
+	        method: 'POST',
+	        body: formData,
+	      });
+	
+	      const data = await response.json();
+	      const notation = data.transcription?.abc_notation;
+	
+	      resetModalDropZone();
+	
+	      if (notation) {
+	        TRANSCRIPTED_SHEET_MUSIC = notation;
+	        EXTRACTED_NOTES = extractNoteSection(notation);
+	
+	        $("#music-sheet").removeClass("bg-red-50 border-red-400");
+	        $("#music-save").data("save-type", crud.CREATE).attr('data-save-type', crud.CREATE);
+	
+	        updateSheetMusic(notation);
+	        populateInputsFromAbc(notation);
+	        $allSettingsPanelInputs.prop('disabled', false);
+	      } else {
+	        alert('Transcription failed: ' + (data.error || 'unknown error'));
+	        $('#loading').hide();
+	        $('#music-sheet').show();
+	      }
+	
+	    } catch (err) {
+	      console.error('Upload error:', err);
+	      $('#loading').hide();
+	    }
+	  }, 5000); // ⏲️ Record MIDI for 5 seconds before sending to server
+	  // NOTEBOOK CARD CLICK LOGIC
+
+	  } catch (error) {
+		  console.error("Error initializing MIDI:", error);
+		  alert("Error initializing MIDI: " + error.message);
+	  }
   });
-  
-  // NOTEBOOK CARD CLICK LOGIC
-
   $('#notebook-carousel').on('click', '.notebook-sheet-card', function () {
     const notebookId    = $(this).data('notebook-id');
     const notebookTitle = $(this).data('notebook-title');
