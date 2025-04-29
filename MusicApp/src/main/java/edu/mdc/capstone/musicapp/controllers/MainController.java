@@ -70,7 +70,8 @@ public class MainController {
     @GetMapping("/dashboard")
     public String dashboardNoId(HttpSession session) {
         return "redirect:/";
-    }
+    }       
+
 
     @GetMapping("/dashboard/{userId}")
     public String dashboardWithId(@PathVariable String userId, Model model) {

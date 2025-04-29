@@ -56,7 +56,65 @@ $(document).ready(function () {
     $('#modalDropZoneContent').html(defaultModalHTML());
     $('#modalUploadButtonContainer').hide();
   }
+  
+  
+  function setupAnalyser(source) {
+     analyser = audioContext.createAnalyser();
+     source.connect(analyser);
+     analyser.fftSize = 2048;
+     dataArray = new Uint8Array(analyser.fftSize);
+   }
+   
+   async function startRecording() {
+		try {
+			const devices = await navigator.mediaDevices.enumerateDevices();
+			
+			const audioInput = devices.some(device => device.kind === 'audioinput');
+			
+			if (!audioInput) {
+				alert("No audio input devices found.");
+				console.error("No audio input devices found.");
+				return false;
+			}
+			
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			audioStream = stream;
+			audioContext = new (window.AudioContext || window.webkitAudioContext)();
+			
+			const source = audioContext.createMediaStreamSource(stream);
+			setupAnalyser(source);
+			recorder = new Recorder(source, { numChannels: 1 });
+			recorder.record();
+			return true;
+		  
+		} catch (err) {
+		  console.error('Initialization error:', err);
+		  return false;
+		 }
+	 }
 
+	 function stopRecording() {
+		isRecording = false;
+		if (recorder) {
+			if (!isPaused) recorder.stop();
+			if (audioStream) audioStream.getTracks().forEach(track => track.stop());
+		 }
+	  }
+	 
+	function pauseRecording() {
+		if (recorder && !isPaused) {
+		  recorder.stop();
+		  isPaused = true;
+		}
+	}
+	
+	function resumeRecording() {
+	   if (recorder && isPaused) {
+	     recorder.record();
+	     isPaused = false;
+		 }
+	 }
+		 
   function initSynthControls() {
     if (ABCJS.synth.supportsAudio() && !window.synthControl) {
       window.synthControl = new ABCJS.synth.SynthController();
@@ -87,13 +145,6 @@ $(document).ready(function () {
     }
   }
 
-  function setupAnalyser(source) {
-    analyser = audioContext.createAnalyser();
-    source.connect(analyser);
-    analyser.fftSize = 2048;
-    dataArray = new Uint8Array(analyser.fftSize);
-  }
-
   function clearCanvas() {
     const ctx = $waveformCanvas[0].getContext('2d');
     ctx.clearRect(0, 0, $waveformCanvas[0].width, $waveformCanvas[0].height);
@@ -105,10 +156,15 @@ $(document).ready(function () {
           WIDTH  = canvas.width,
           HEIGHT = canvas.height;
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
     if (analyser) {
       analyser.getByteTimeDomainData(dataArray);
+
+      // background
       ctx.fillStyle   = 'rgb(255,240,240)';
       ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      // waveform
       ctx.lineWidth   = 2;
       ctx.strokeStyle = 'rgb(224,23,23)';
       ctx.beginPath();
@@ -118,14 +174,25 @@ $(document).ready(function () {
         const v = dataArray[i] / 128.0,
               y = (v * HEIGHT) / 2;
         if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        else         ctx.lineTo(x, y);
         x += sliceWidth;
       }
       ctx.lineTo(WIDTH, HEIGHT / 2);
       ctx.stroke();
+
+      // only flash when actually recording
+      if (isRecording && !isPaused && Math.floor(Date.now() / 500) % 2 === 0) {
+        ctx.font         = 'bold 20px sans-serif';
+        ctx.fillStyle    = 'red';
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Recording:', 10, 10);
+      }
     }
+
     animationId = requestAnimationFrame(drawWaveform);
   }
+
 
   function drawRecordedWaveform(blob) {
     const reader = new FileReader();
@@ -248,18 +315,50 @@ $(document).ready(function () {
     }
   }
 
-  //------------------------------------------------------
-  // AJAX Call Functions
-  //------------------------------------------------------
-  function saveMusicSheet(userId, title, abcNotation) {
-    return $.ajax({
-      url: "/api/music-sheets"+userId,
-      method: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({ userId, title, abcNotation })
-    });
+  async function uploadMidi(blob, filename) {
+    $('#loading').show();
+    const form = new FormData();
+    form.append("file", blob, filename);
+
+    const res = await fetch(
+      "https://secure-darling-minnow.ngrok-free.app/upload",
+      {
+        method: "POST",
+        headers: { "ngrok-skip-browser-warning": "true" },
+        body: form
+      }
+    );
+
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
   }
 
+  function handleTranscription(data) {
+    const notation = data?.transcription?.abc_notation;
+    resetModalDropZone();
+    $('#loading').hide();
+
+    if (!notation) {
+      alert("Transcription failed: " + (data.error || "unknown error"));
+      $('#music-sheet').show();
+      return;
+    }
+
+    TRANSCRIPTED_SHEET_MUSIC = notation;
+    EXTRACTED_NOTES          = extractNoteSection(notation);
+
+    $("#music-sheet")
+      .removeClass("bg-red-50 border-red-400");
+    $("#music-save")
+      .data("save-type", crud.CREATE)
+      .attr("data-save-type", crud.CREATE);
+
+    updateSheetMusic(notation);
+    populateInputsFromAbc(notation);
+    $("#settings-panel input, #settings-panel select, #settings-panel button")
+      .prop("disabled", false);
+  }
+  
   //------------------------------------------------------
   // Event Handlers
   //------------------------------------------------------
@@ -290,6 +389,7 @@ $(document).ready(function () {
         if (notation) {
           TRANSCRIPTED_SHEET_MUSIC = notation;
 		  EXTRACTED_NOTES = extractNoteSection(notation);
+		  $("#music-sheet").removeClass("bg-red-50 border-red-400")
 		  $("#music-save").data("save-type",crud.CREATE).attr('data-save-type',crud.CREATE)
           updateSheetMusic(notation);
           populateInputsFromAbc(notation);
@@ -334,9 +434,11 @@ $(document).ready(function () {
   });
 
   // Recording controls
-  let isRecording = false, isPaused = false, recorder, audioStream, audioContext, recordedBlob, analyser, dataArray, animationId;
-  const $recordButton    = $('.recordButton');
-  const $waveformCanvas  = $('#waveform');
+  let isRecording = false, isPaused = false, recorder, audioStream, audioContext, recordedBlob, analyser, dataArray;
+  const $recordButton      = $('.recordButton');
+  const $stopButton        = $('#stop-recording');
+  const $waveformCanvas    = $('#waveform');
+  const $recordOptionModal = $('#chooseRecordOptionModal');
 
   $recordButton.on('click', async function () {
     if (!isRecording || isPaused) {
@@ -344,6 +446,11 @@ $(document).ready(function () {
       if (ok) {
         isRecording = true;
         isPaused = false;
+		$waveformCanvas.show()
+		$stopButton.prop('disabled', false)
+		$recordOptionModal.hide()
+		$("#recording-controls").show()
+		requestAnimationFrame(drawWaveform);
       } else {
         $("#recording-error").remove();
         $(this).before('<div id="recording-error" class="text-red-500 text-sm mb-2">Error Accessing Recording Device</div>');
@@ -360,13 +467,14 @@ $(document).ready(function () {
     }
   });
 
-  $('#stop-recording').on('click', function () {
+  $stopButton.on('click', function () {
     if (isRecording) {
       stopRecording();
-      isRecording = false;
       $("#recordButton").removeClass('bg-red-100');
+	  $(this).prop('disabled', true)
       $(this).removeClass('bg-red-100 animate-pulse text-red-700');
       $('#submit-recording').show();
+	  $waveformCanvas.hide()
       $recordButton.find('i').attr('data-feather', 'mic');
       feather.replace();
 
@@ -390,10 +498,20 @@ $(document).ready(function () {
     })
       .then(res => res.json())
       .then(data => {
-        if (data.transcription?.abc_notation) {
-          updateSheetMusic(data.transcription.abc_notation);
+		const notation = data?.transcription?.abc_notation
+        if (notation) {
+		  TRANSCRIPTED_SHEET_MUSIC = notation;
+	  	  EXTRACTED_NOTES = extractNoteSection(notation);		  	  
+          updateSheetMusic(notation);
+		  populateInputsFromAbc(notation);
+	  	  $allSettingsPanelInputs.prop('disabled', false);
+	  	  $("#music-save").data("save-type",crud.CREATE).attr('data-save-type',crud.CREATE);
           $("#music-save, #midi-link").prop('disabled', false);
           $("#submit-recording").prop('disabled', true);
+          $("#waveform, #recording-controls").hide();
+		  $("#music-sheet").removeClass('bg-red-50 border-red-400');
+		  
+		  
         } else {
           alert('Transcription failed: ' + (data.error || 'unknown error'));
           $('#loading').hide();
@@ -408,34 +526,42 @@ $(document).ready(function () {
 
   $('#reset-recording').on('click', function () {
     if (recorder) recorder.clear();
+	stopRecording();
     recordedBlob = null;
-    isRecording = false;
     isPaused = false;
     $('#recording-controls').hide();
     $waveformCanvas.hide();
-    $("#recordButton").removeClass('bg-red-100').prop('disabled', false).find('i').attr('data-feather', 'mic');
+    $recordButton.removeClass('bg-red-100').prop('disabled', false).find('i').attr('data-feather', 'mic');
     feather.replace();
     clearCanvas();
   });
-
-  requestAnimationFrame(drawWaveform);
 
   // Notebook & Sheet management
   $('#deleteMusicSheet').on('click', function () {
     const sheetId = $(this).data('musicsheet-id');
     if (!sheetId || !confirm('Are you sure you want to delete this sheet music?')) return;
-    $('#loading').show();
+    $('#loading').show('slow');
 
     $.ajax({
       url: "/api/music-sheets/"+sheetId,
       method: 'DELETE'
     })
       .done(() => {
-        $('#loading').hide();
-        alert('Sheet music deleted successfully.');
+        $('#loading').hide('slow');
         $("#music-sheet-carousel ul .sm-sheet-card[data-musicsheet-id='"+sheetId+"']").remove();
-        $('#music-sheet').html('');
-        $(this).removeAttr('data-musicsheet-id');
+        $('#music-sheet').html(`<div id="uploadShortcutWrapper" class="text-xl absolute left-1/2 top-1/2 flex flex-col sm:flex-row gap-5"
+		style="transform: translate(-50%, -50%);">
+			<div  class="relative">
+			  <button class="chooseRecordOption bg-red-500 border-2 border-red-400 rounded p-3 px-4 text-white text-4xl sm:text-xl">
+			    Record
+			  </button>
+			</div>
+			<button class="upload-button bg-white rounded p-3 px-4 border-2 border-red-400 text-red-600 text-4xl sm:text-xl">
+			    Upload
+			</button>
+		</div>`).addClass('bg-red-50 border-red-400').css({'padding-bottom':'initial'});
+        $(this).removeAttr('data-musicsheet-id').prop('disabled', true);
+        alert('Sheet music deleted successfully.');
       })
       .fail(xhr => {
         $('#loading').hide();
@@ -496,7 +622,7 @@ $(document).ready(function () {
     // grab title & notation
     const title       = $('#abc-title').val().trim() || "Music Sheet Title";
     const abcNotation = TRANSCRIPTED_SHEET_MUSIC || "";
-	const requestType = $(this).data('save-type') == crud.UPDATE
+	const requestType = $(this).data('save-type') == crud.UPDATE ? true : false; 
 
     // see if we're editing an existing sheet:
     const sheetId = CURRENT_MUSIC_SHEET_ID;
@@ -538,7 +664,7 @@ $(document).ready(function () {
     $(".notebooks-panel").toggleClass("open");
   });
 
-  $(".chooseRecordOption").on("click", function () {
+  $(".chooseRecordOption").off('click').on("click", function () {
     $("#chooseRecordOptionModal").insertBefore(this).show();
   });
 
@@ -551,32 +677,55 @@ $(document).ready(function () {
   });
 
   // MIDI RECORD TRIGGER LOGIC
-  $("#recordMidiButton").on('click', function () {
-    requestMIDIAccess();
-    requestMIDIAccess(MIDIOptions);
+  $("#recordMidiButton").on("click", async () => {
+    if (!navigator.requestMIDIAccess) {
+      alert("Web MIDI is not supported in this browser.");
+      return;
+    }
 
-    navigator.permissions.query({ name: "midi", sysex: true }).then(result => {
-      if (result.state === "granted") {
-        navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
-        function onMIDISuccess(midiAccess) {
-          console.log("MIDI ready!");
-          for (const entry of midiAccess.inputs) entry[1].onmidimessage = onMIDIMessage;
-          for (const entry of midiAccess.outputs) { /* ... */ }
+    try {
+      // This call triggers the permission prompt
+      const midiAccess = await navigator.requestMIDIAccess({ sysex: true });
+      console.log("MIDI ready!", midiAccess);
+
+      const capturedData = [];
+
+      midiAccess.inputs.forEach(input => {
+        input.onmidimessage = evt => {
+          capturedData.push({
+            timeStamp: evt.timeStamp,
+            data: [...evt.data]         // spread keeps it readable
+          });
+          console.log("Captured MIDI:", [...evt.data]);
+        };
+      });
+
+      // Record for 5 s, then upload
+      setTimeout(async () => {
+        if (!capturedData.length) {
+          alert("No MIDI data captured.");
+          return;
         }
-        function onMIDIFailure(msg) {
-          console.error("Failed to get MIDI access", msg);
+
+        try {
+          const jsonBlob  = new Blob([JSON.stringify(capturedData)], {
+            type: "application/json"
+          });
+          const result = await uploadMidi(jsonBlob, "capture.midi");
+          handleTranscription(result);
+        } catch (err) {
+          console.error("Upload error:", err);
+          $('#loading').hide();
         }
-        function onMIDIMessage(event) {
-          let str = `MIDI message at ${event.timeStamp}: `;
-          event.data.forEach(byte => { str += "0x"+byte.toString(16); });
-          console.log(str);
-        }
-      }
-    });
+      }, 5000);
+    } catch (err) {
+      // User hit “Block” or device unavailable
+      console.error("MIDI access failed:", err);
+      alert("Unable to access MIDI devices: " + err.message);
+    }
   });
   
-  // NOTEBOOK CARD CLICK LOGIC
-
+	// Notebook click logic
   $('#notebook-carousel').on('click', '.notebook-sheet-card', function () {
     const notebookId    = $(this).data('notebook-id');
     const notebookTitle = $(this).data('notebook-title');
