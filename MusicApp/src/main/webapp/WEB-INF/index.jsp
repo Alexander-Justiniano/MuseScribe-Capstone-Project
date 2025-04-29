@@ -279,7 +279,7 @@ div#loading {
           </div>
           <!-- User Music Sheets -->
           <div>
-            <c:if test="${notebooks.size() > 0}">
+
               <div id="notebook-carousel" class="border-2 rounded">
                 <h3 class="text-center text-lg bg-gray-200 p-1">
                   Your Notebooks
@@ -306,7 +306,7 @@ div#loading {
 
                 </ul>
               </div>
-            </c:if>
+
             <div id="music-sheet-carousel" class="border rounded" style="display:none;">
               <div class="bg-gray-200 flex p-2 text-center justify-between">
                 <div class="flex items-center">					
