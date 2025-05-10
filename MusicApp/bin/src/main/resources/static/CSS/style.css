@@ -1,0 +1,57 @@
+
+/* TODO: Consider React over static CSS. Phase out depreciated code */
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 300px; /* Fixed size */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    border: 1px solid #ddd;
+    z-index: 1;
+    right: 0; /* Align to button */
+}
+
+.dropdown-content a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+}
+
+/*
+TODO: remove after tailwind replaces func.
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+*/
+.waveform-placeholder {
+	background: repeating-linear-gradient(
+		90deg,
+		#f3f4f6 0px,
+        #f3f4f6 40px,
+        #e5e7eb 40px,
+        #e5e7eb 80px
+	);
+}
+.sheet-music-placeholder {
+	background: repeating-linear-gradient(
+ 		 0deg,
+	 	f3f4f6 0px,
+		 f3f4f6 20px,
+		 #e5e7eb 20px,
+		 #e5e7eb 25px
+	);
+}
